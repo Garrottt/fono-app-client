@@ -6,6 +6,8 @@ import {
   deactivatePatientService
 } from "../services/patient.service"
 
+import { Link } from "react-router-dom"
+
 function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
@@ -155,7 +157,14 @@ function PatientsPage() {
             <tbody className="divide-y divide-gray-100">
               {patients.map(patient => (
                 <tr key={patient.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-800">{patient.name}</td>
+                    <td className="px-6 py-4">
+                        <Link
+                            to={`/patients/${patient.id}`}
+                            className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                        >
+                            {patient.name}
+                        </Link>
+                    </td>
                   <td className="px-6 py-4 text-gray-500">{patient.email || "—"}</td>
                   <td className="px-6 py-4 text-gray-500">{patient.phone || "—"}</td>
                   <td className="px-6 py-4">
