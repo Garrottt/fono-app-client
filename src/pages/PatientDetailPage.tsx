@@ -6,6 +6,7 @@ import { getPatientsService } from "../services/patient.service"
 import { getSessionsService, createSessionService } from "../services/session.service"
 import GoalsSection from "../components/GoalsSection"
 import TasksSection from "../components/TasksSection"
+import FilesSection from "../components/FilesSection"
 
 function PatientDetailPage() {
   const { id } = useParams()
@@ -178,6 +179,9 @@ function PatientDetailPage() {
       </div>
       <div className="mt-8">
         <TasksSection patientId={id!} />
+      </div>
+      <div className="mt-8">
+        <FilesSection patientId={id!} />
       </div>
     </div>
   )
