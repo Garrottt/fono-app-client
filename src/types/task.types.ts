@@ -1,3 +1,5 @@
+import type { FileRecord } from "./file.types"
+
 export interface Task {
   id: string
   patientId: string
@@ -5,6 +7,7 @@ export interface Task {
   description?: string
   assignedAt: string
   seen: boolean
+  files: FileRecord[]
 }
 
 export interface CreateTaskInput {

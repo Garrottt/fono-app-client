@@ -16,10 +16,19 @@ export const getTasksService = async (patientId: string): Promise<Task[]> => {
 
 export const createTaskService = async (
   patientId: string,
-  data: CreateTaskInput
+  data: CreateTaskInput,
+  file?: File
 ): Promise<Task> => {
-  const response = await axios.post(`${API_URL}/patients/${patientId}/tasks`, data, {
-    headers: getHeaders()
+  const formData = new FormData()
+  formData.append("title", data.title)
+  if (data.description) formData.append("description", data.description)
+  if (file) formData.append("file", file)
+
+  const response = await axios.post(`${API_URL}/patients/${patientId}/tasks`, formData, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      "Content-Type": "multipart/form-data"
+    }
   })
   return response.data.task
 }

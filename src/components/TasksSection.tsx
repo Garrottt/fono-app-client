@@ -12,6 +12,7 @@ function TasksSection({ patientId }: Props) {
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
 
@@ -37,11 +38,12 @@ function TasksSection({ patientId }: Props) {
 
     try {
       const input: CreateTaskInput = { title, description }
-      const newTask = await createTaskService(patientId, input)
+      const newTask = await createTaskService(patientId, input, selectedFile ?? undefined)
       setTasks([newTask, ...tasks])
       setShowForm(false)
       setTitle("")
       setDescription("")
+      setSelectedFile(null)
     } catch (err) {
       setError("Error al crear la tarea")
     } finally {
@@ -66,6 +68,13 @@ function TasksSection({ patientId }: Props) {
       month: "long",
       day: "numeric"
     })
+  }
+
+  const getFileIcon = (filetype: string) => {
+    if (filetype === "application/pdf") return "📄"
+    if (filetype.includes("word")) return "📝"
+    if (filetype.startsWith("image/")) return "🖼️"
+    return "📎"
   }
 
   if (loading) return <p className="text-gray-400 text-sm">Cargando tareas...</p>
@@ -116,6 +125,21 @@ function TasksSection({ patientId }: Props) {
             />
           </div>
 
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              Adjuntar archivo <span className="text-gray-400 font-normal">(opcional)</span>
+            </label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+              className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            />
+            {selectedFile && (
+              <p className="text-xs text-gray-400">Archivo seleccionado: {selectedFile.name}</p>
+            )}
+          </div>
+
           <div className="flex justify-end">
             <button
               type="submit"
@@ -142,6 +166,25 @@ function TasksSection({ patientId }: Props) {
                   {task.description && (
                     <p className="text-sm text-gray-500 leading-relaxed">{task.description}</p>
                   )}
+
+                  {task.files && task.files.length > 0 && (
+                    <div className="mt-3 flex flex-col gap-1">
+                      {task.files.map(file => (
+                        <a
+                          key={file.id}
+                          href={"http://localhost:3000" + file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
+                        >
+                          <span>{getFileIcon(file.filetype)}</span>
+                          <span>{file.filename}</span>
+                          <span className="text-gray-400">— Descargar</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
                   <p className="text-xs text-gray-400 mt-2">Asignada el {formatDate(task.assignedAt)}</p>
                 </div>
                 <button
