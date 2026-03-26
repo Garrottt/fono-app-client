@@ -4,6 +4,7 @@ import type { Patient } from "../types/patient.types"
 import type { Session, CreateSessionInput } from "../types/session.types"
 import { getPatientsService } from "../services/patient.service"
 import { getSessionsService, createSessionService } from "../services/session.service"
+import GoalsSection from "../components/GoalsSection"
 
 function PatientDetailPage() {
   const { id } = useParams()
@@ -171,7 +172,9 @@ function PatientDetailPage() {
           ))}
         </div>
       )}
-
+      <div className="mt-8">
+        <GoalsSection patientId={id!} />
+      </div>
     </div>
   )
 }
