@@ -56,3 +56,35 @@ export const updateOperationalGoalService = async (
   )
   return response.data.operationalGoal
 }
+export const updateGoalDescriptionService = async (
+  patientId: string,
+  goalId: string,
+  data: { description?: string; startDate?: string; endDate?: string }
+): Promise<Goal> => {
+  const response = await axios.patch(
+    `${API_URL}/patients/${patientId}/goals/${goalId}`,
+    data,
+    { headers: getHeaders() }
+  )
+  return response.data.goal
+}
+
+export const deleteOperationalGoalService = async (
+  patientId: string,
+  operationalId: string
+): Promise<void> => {
+  await axios.delete(
+    `${API_URL}/patients/${patientId}/goals/operational/${operationalId}`,
+    { headers: getHeaders() }
+  )
+}
+
+export const deleteGoalService = async (
+  patientId: string,
+  goalId: string
+): Promise<void> => {
+  await axios.delete(
+    `${API_URL}/patients/${patientId}/goals/${goalId}`,
+    { headers: getHeaders() }
+  )
+}
