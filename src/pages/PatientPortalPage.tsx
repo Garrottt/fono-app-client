@@ -75,8 +75,6 @@ function PatientPortalPage() {
       </header>
 
       <main className="max-w-3xl mx-auto p-6">
-
-        {/* Tabs */}
         <div className="flex gap-1 bg-white rounded-lg shadow-sm p-1 mb-6">
           {[
             { key: "sessions", label: "Sesiones" },
@@ -101,7 +99,6 @@ function PatientPortalPage() {
           <p className="text-gray-400 text-sm text-center">Cargando...</p>
         ) : (
           <>
-            {/* Sesiones */}
             {activeTab === "sessions" && (
               <div className="flex flex-col gap-3">
                 {sessions.length === 0 ? (
@@ -117,7 +114,6 @@ function PatientPortalPage() {
               </div>
             )}
 
-            {/* Objetivos */}
             {activeTab === "goals" && (
               <div className="flex flex-col gap-4">
                 {goals.length === 0 ? (
@@ -139,25 +135,18 @@ function PatientPortalPage() {
                         {goal.completed ? "Completado" : "En progreso"}
                       </span>
                     </div>
-
                     {goal.operationalGoals.length > 0 && (
                       <div className="flex flex-col gap-2">
                         {goal.operationalGoals.map(op => (
                           <div key={op.id} className="flex items-center gap-3 p-2 rounded-md bg-gray-50">
                             <div className={`w-2 h-2 rounded-full shrink-0 ${
-                              op.status === "cumplido" ? "bg-green-500" :
-                              op.status === "cumplido_con_ayuda" ? "bg-blue-500" :
-                              op.status === "cumplido_con_dificultad" ? "bg-yellow-500" :
-                              "bg-gray-300"
+                              op.completed ? "bg-green-500" : "bg-gray-300"
                             }`} />
                             <span className={`text-sm flex-1 ${
-                              op.status !== "no_cumplido" ? "line-through text-gray-400" : "text-gray-700"
+                              op.completed ? "line-through text-gray-400" : "text-gray-700"
                             }`}>
                               {op.description}
                             </span>
-                            {op.notes && (
-                              <span className="text-xs text-gray-400 italic">"{op.notes}"</span>
-                            )}
                           </div>
                         ))}
                       </div>
@@ -167,7 +156,6 @@ function PatientPortalPage() {
               </div>
             )}
 
-            {/* Tareas */}
             {activeTab === "tasks" && (
               <div className="flex flex-col gap-3">
                 {tasks.length === 0 ? (

@@ -18,9 +18,14 @@ export const createGoalService = async (
   patientId: string,
   data: CreateGoalInput
 ): Promise<Goal> => {
-  const response = await axios.post(`${API_URL}/patients/${patientId}/goals`, data, {
-    headers: getHeaders()
-  })
+  const response = await axios.post(`${API_URL}/patients/${patientId}/goals`, 
+    {
+      ...data,
+      startDate: data.startDate + "T12:00:00",
+      endDate: data.endDate + "T12:00:00"
+    },
+    { headers: getHeaders() }
+  )
   return response.data.goal
 }
 
