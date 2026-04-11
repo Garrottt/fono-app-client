@@ -41,3 +41,27 @@ export const deleteTaskService = async (
     headers: getHeaders()
   })
 }
+export const updateTaskService = async (
+  patientId: string,
+  taskId: string,
+  title: string,
+  description?: string,
+  file?: File
+): Promise<Task> => {
+  const formData = new FormData()
+  formData.append("title", title)
+  if (description) formData.append("description", description)
+  if (file) formData.append("file", file)
+
+  const response = await axios.put(
+    `${API_URL}/patients/${patientId}/tasks/${taskId}`,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "multipart/form-data"
+      }
+    }
+  )
+  return response.data.task
+}
