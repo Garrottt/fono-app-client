@@ -1,3 +1,9 @@
+export interface AppointmentReminder {
+  id: string
+  scheduledAt: string
+  sentAt?: string | null
+}
+
 export interface Appointment {
   id: string
   patientId: string
@@ -5,8 +11,7 @@ export interface Appointment {
   datetime: string
   status: string
   notes?: string
-  reminderSent: boolean
-  reminderScheduledAt?: string
+  reminders: AppointmentReminder[]
   patient?: {
     id: string
     name: string
@@ -18,12 +23,12 @@ export interface CreateAppointmentInput {
   patientId: string
   datetime: string
   notes?: string
-  reminderScheduledAt?: string
+  reminderScheduledAts?: string[]
 }
 
 export interface UpdateAppointmentInput {
   datetime?: string
   notes?: string
   status?: string
-  reminderScheduledAt?: string
+  reminderScheduledAts?: string[]
 }

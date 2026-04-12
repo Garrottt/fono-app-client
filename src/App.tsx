@@ -2,10 +2,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider, useAuth } from "./context/authContext"
 import LoginPage from "./pages/LoginPage"
 import DashboardPage from "./pages/DashboardPage"
+import DashboardHomePage from "./pages/DashboardHomePage"
 import PatientsPage from "./pages/PatientsPage"
 import PatientDetailPage from "./pages/PatientDetailPage"
 import PatientPortalPage from "./pages/PatientPortalPage"
 import AppointmentsPage from "./pages/AppointmentsPage"
+import PasswordSetupPage from "./pages/PasswordSetupPage"
+import AnamnesisPage from "./pages/AnamnesisPage"
+import PreLavadoPage from "./pages/PreLavadoPage"
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
@@ -15,7 +19,6 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   const { isAuthenticated, user } = useAuth()
 
-  // Si está autenticado y es paciente, redirigir al portal del paciente
   const getHomeRoute = () => {
     if (!isAuthenticated) return "/login"
     if (user?.role === "PATIENT") return "/portal"
@@ -28,8 +31,8 @@ function AppRoutes() {
         path="/login"
         element={isAuthenticated ? <Navigate to={getHomeRoute()} /> : <LoginPage />}
       />
+      <Route path="/portal/set-password" element={<PasswordSetupPage />} />
 
-      {/* Rutas del profesional */}
       <Route
         path="/"
         element={
@@ -38,15 +41,14 @@ function AppRoutes() {
           </PrivateRoute>
         }
       >
-        <Route path="dashboard" element={<p className="p-6 text-gray-500">Seleccioná una opción del menú.</p>} />
+        <Route path="dashboard" element={<DashboardHomePage />} />
         <Route path="patients" element={<PatientsPage />} />
         <Route path="patients/:id" element={<PatientDetailPage />} />
+        <Route path="anamnesis" element={<AnamnesisPage />} />
+        <Route path="pre-lavado" element={<PreLavadoPage />} />
         <Route path="appointments" element={<AppointmentsPage />} />
       </Route>
 
-      
-
-      {/* Portal del paciente */}
       <Route
         path="/portal"
         element={
@@ -70,6 +72,5 @@ function App() {
     </BrowserRouter>
   )
 }
-
 
 export default App

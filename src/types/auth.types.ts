@@ -14,3 +14,17 @@ export interface AuthResponse {
   token: string
   user: User
 }
+
+export interface ValidatePasswordSetupResponse {
+  valid: boolean
+  user: {
+    id: string
+    email: string
+    name: string
+  }
+}
+
+export interface CompletePasswordSetupInput {
+  token: string
+  newPassword: string
+}

@@ -13,10 +13,17 @@ const STATUS_OPTIONS = [
   { value: "SCHEDULED", label: "Programada" },
   { value: "COMPLETED", label: "Completada" },
   { value: "CANCELLED", label: "Cancelada" },
-  { value: "NO_SHOW", label: "No asisti\u00f3" },
+  { value: "NO_SHOW", label: "No asistio" },
 ]
 
 const CHILE_TIMEZONE = "America/Santiago"
+const QUICK_REMINDER_OPTIONS = [
+  { label: "15 min antes", minutesBefore: 15 },
+  { label: "1 hora antes", minutesBefore: 60 },
+  { label: "3 horas antes", minutesBefore: 180 },
+  { label: "1 dia antes", minutesBefore: 1440 },
+  { label: "1 semana antes", minutesBefore: 10080 }
+]
 
 const formatDatetime = (dateString: string) => {
   const date = new Date(dateString)
@@ -48,6 +55,36 @@ const toDateTimeLocalValue = (dateString: string) => {
   return formatter.format(date).replace(" ", "T")
 }
 
+const createEmptyReminderList = () => [""]
+
+const toIsoDateTimeLocal = (date: Date) => {
+  const formatter = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: CHILE_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  })
+
+  return formatter.format(date).replace(" ", "T")
+}
+
+const getQuickReminderValue = (appointmentDateTime: string, minutesBefore: number) => {
+  if (!appointmentDateTime) return ""
+
+  const [datePart, timePart] = appointmentDateTime.split("T")
+  if (!datePart || !timePart) return ""
+
+  const [year, month, day] = datePart.split("-").map(Number)
+  const [hour, minute] = timePart.split(":").map(Number)
+  const appointmentDate = new Date(year, month - 1, day, hour, minute)
+  appointmentDate.setMinutes(appointmentDate.getMinutes() - minutesBefore)
+
+  return toIsoDateTimeLocal(appointmentDate)
+}
+
 function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
@@ -59,13 +96,13 @@ function AppointmentsPage() {
   const [patientId, setPatientId] = useState("")
   const [datetime, setDatetime] = useState("")
   const [notes, setNotes] = useState("")
-  const [reminderScheduledAt, setReminderScheduledAt] = useState("")
+  const [reminderScheduledAts, setReminderScheduledAts] = useState<string[]>(createEmptyReminderList())
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editDatetime, setEditDatetime] = useState("")
   const [editNotes, setEditNotes] = useState("")
   const [editStatus, setEditStatus] = useState("")
-  const [editReminderScheduledAt, setEditReminderScheduledAt] = useState("")
+  const [editReminderScheduledAts, setEditReminderScheduledAts] = useState<string[]>(createEmptyReminderList())
 
   useEffect(() => {
     fetchData()
@@ -86,6 +123,42 @@ function AppointmentsPage() {
     }
   }
 
+  const updateReminderAtIndex = (
+    reminders: string[],
+    index: number,
+    value: string,
+    setter: (value: string[]) => void
+  ) => {
+    setter(reminders.map((reminder, reminderIndex) => reminderIndex === index ? value : reminder))
+  }
+
+  const addReminderField = (setter: (value: string[]) => void, reminders: string[]) => {
+    setter([...reminders, ""])
+  }
+
+  const applyQuickReminder = (
+    appointmentDateTime: string,
+    minutesBefore: number,
+    reminders: string[],
+    setter: (value: string[]) => void
+  ) => {
+    const quickValue = getQuickReminderValue(appointmentDateTime, minutesBefore)
+    if (!quickValue) return
+
+    const normalizedExisting = normalizeReminderPayload(reminders)
+    if (normalizedExisting.includes(quickValue)) return
+
+    setter([...normalizedExisting, quickValue])
+  }
+
+  const removeReminderField = (setter: (value: string[]) => void, reminders: string[], index: number) => {
+    const next = reminders.filter((_, reminderIndex) => reminderIndex !== index)
+    setter(next.length > 0 ? next : createEmptyReminderList())
+  }
+
+  const normalizeReminderPayload = (reminders: string[]) =>
+    reminders.map((reminder) => reminder.trim()).filter(Boolean)
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
@@ -96,7 +169,7 @@ function AppointmentsPage() {
         patientId,
         datetime,
         notes: notes || undefined,
-        reminderScheduledAt: reminderScheduledAt || undefined
+        reminderScheduledAts: normalizeReminderPayload(reminderScheduledAts)
       }
       const newAppointment = await createAppointmentService(input)
       setAppointments([...appointments, newAppointment])
@@ -104,7 +177,7 @@ function AppointmentsPage() {
       setPatientId("")
       setDatetime("")
       setNotes("")
-      setReminderScheduledAt("")
+      setReminderScheduledAts(createEmptyReminderList())
     } catch (err) {
       setError("Error al crear la cita")
     } finally {
@@ -118,7 +191,7 @@ function AppointmentsPage() {
         datetime: editDatetime || undefined,
         notes: editNotes || undefined,
         status: editStatus || undefined,
-        reminderScheduledAt: editReminderScheduledAt || undefined
+        reminderScheduledAts: normalizeReminderPayload(editReminderScheduledAts)
       })
       setAppointments(appointments.map((appointment) => appointment.id === id ? updated : appointment))
       setEditingId(null)
@@ -128,7 +201,7 @@ function AppointmentsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("\u00bfEst\u00e1s seguro de eliminar esta cita?")) return
+    if (!confirm("¿Estas seguro de eliminar esta cita?")) return
     try {
       await deleteAppointmentService(id)
       setAppointments(appointments.filter((appointment) => appointment.id !== id))
@@ -148,7 +221,7 @@ function AppointmentsPage() {
       SCHEDULED: "Programada",
       COMPLETED: "Completada",
       CANCELLED: "Cancelada",
-      NO_SHOW: "No asisti\u00f3"
+      NO_SHOW: "No asistio"
     }
     return (
       <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles[status] || styles.SCHEDULED}`}>
@@ -191,7 +264,7 @@ function AppointmentsPage() {
                 className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
-                <option value="">Seleccioná un paciente</option>
+                <option value="">Selecciona un paciente</option>
                 {patients.map((patient) => (
                   <option key={patient.id} value={patient.id}>{patient.name}</option>
                 ))}
@@ -212,17 +285,49 @@ function AppointmentsPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">
-              Recordatorio programado <span className="text-gray-400 font-normal">(opcional)</span>
-            </label>
-            <input
-              type="datetime-local"
-              value={reminderScheduledAt}
-              onChange={(e) => setReminderScheduledAt(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <p className="text-xs text-gray-400">Ej: la tarde anterior a la cita</p>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-700">Recordatorios</label>
+              <button
+                type="button"
+                onClick={() => addReminderField(setReminderScheduledAts, reminderScheduledAts)}
+                className="text-sm text-indigo-600 hover:text-indigo-700"
+              >
+                + Agregar recordatorio
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {QUICK_REMINDER_OPTIONS.map((option) => (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={() => applyQuickReminder(datetime, option.minutesBefore, reminderScheduledAts, setReminderScheduledAts)}
+                  disabled={!datetime}
+                  className="rounded-full border border-indigo-200 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            {reminderScheduledAts.map((reminder, index) => (
+              <div key={`create-reminder-${index}`} className="flex items-center gap-2">
+                <input
+                  type="datetime-local"
+                  value={reminder}
+                  onChange={(e) => updateReminderAtIndex(reminderScheduledAts, index, e.target.value, setReminderScheduledAts)}
+                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeReminderField(setReminderScheduledAts, reminderScheduledAts, index)}
+                  className="text-sm text-red-500 hover:text-red-600 px-2 py-2"
+                >
+                  Quitar
+                </button>
+              </div>
+            ))}
           </div>
 
           <div className="flex flex-col gap-1">
@@ -250,7 +355,7 @@ function AppointmentsPage() {
 
       {appointments.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-          <p className="text-gray-400">No hay citas registradas todav\u00eda.</p>
+          <p className="text-gray-400">No hay citas registradas todavia.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -281,15 +386,52 @@ function AppointmentsPage() {
                       </select>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-gray-700">Recordatorio programado</label>
-                    <input
-                      type="datetime-local"
-                      value={editReminderScheduledAt}
-                      onChange={(e) => setEditReminderScheduledAt(e.target.value)}
-                      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
+
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-700">Recordatorios</label>
+                      <button
+                        type="button"
+                        onClick={() => addReminderField(setEditReminderScheduledAts, editReminderScheduledAts)}
+                        className="text-sm text-indigo-600 hover:text-indigo-700"
+                      >
+                        + Agregar recordatorio
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {QUICK_REMINDER_OPTIONS.map((option) => (
+                        <button
+                          key={option.label}
+                          type="button"
+                          onClick={() => applyQuickReminder(editDatetime, option.minutesBefore, editReminderScheduledAts, setEditReminderScheduledAts)}
+                          disabled={!editDatetime}
+                          className="rounded-full border border-indigo-200 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {editReminderScheduledAts.map((reminder, index) => (
+                      <div key={`edit-reminder-${index}`} className="flex items-center gap-2">
+                        <input
+                          type="datetime-local"
+                          value={reminder}
+                          onChange={(e) => updateReminderAtIndex(editReminderScheduledAts, index, e.target.value, setEditReminderScheduledAts)}
+                          className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeReminderField(setEditReminderScheduledAts, editReminderScheduledAts, index)}
+                          className="text-sm text-red-500 hover:text-red-600 px-2 py-2"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    ))}
                   </div>
+
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700">Notas</label>
                     <textarea
@@ -327,13 +469,14 @@ function AppointmentsPage() {
                     {appointment.notes && (
                       <p className="text-xs text-gray-400 mt-1">{appointment.notes}</p>
                     )}
-                    {appointment.reminderScheduledAt && !appointment.reminderSent && (
-                      <p className="text-xs text-indigo-400 mt-1">
-                        Recordatorio programado: {formatDatetime(appointment.reminderScheduledAt)}
-                      </p>
-                    )}
-                    {appointment.reminderSent && (
-                      <p className="text-xs text-green-500 mt-1">✓ Recordatorio enviado</p>
+                    {appointment.reminders.length > 0 && (
+                      <div className="mt-2 flex flex-col gap-1">
+                        {appointment.reminders.map((reminder) => (
+                          <p key={reminder.id} className={`text-xs ${reminder.sentAt ? "text-green-500" : "text-indigo-400"}`}>
+                            {reminder.sentAt ? "Recordatorio enviado" : "Recordatorio programado"}: {formatDatetime(reminder.scheduledAt)}
+                          </p>
+                        ))}
+                      </div>
                     )}
                   </div>
                   <div className="flex gap-3 ml-4">
@@ -343,10 +486,10 @@ function AppointmentsPage() {
                         setEditDatetime(toDateTimeLocalValue(appointment.datetime))
                         setEditNotes(appointment.notes || "")
                         setEditStatus(appointment.status)
-                        setEditReminderScheduledAt(
-                          appointment.reminderScheduledAt
-                            ? toDateTimeLocalValue(appointment.reminderScheduledAt)
-                            : ""
+                        setEditReminderScheduledAts(
+                          appointment.reminders.length > 0
+                            ? appointment.reminders.map((reminder) => toDateTimeLocalValue(reminder.scheduledAt))
+                            : createEmptyReminderList()
                         )
                       }}
                       className="text-indigo-500 hover:text-indigo-700 text-xs font-medium transition-colors"

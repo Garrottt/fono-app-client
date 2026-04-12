@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import type { Patient, CreatePatientInput } from "../types/patient.types"
 import {
   getPatientsService,
@@ -6,13 +7,12 @@ import {
   deactivatePatientService
 } from "../services/patient.service"
 
-import { Link } from "react-router-dom"
-
 function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState("")
+  const [age, setAge] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [error, setError] = useState("")
@@ -39,11 +39,17 @@ function PatientsPage() {
     setError("")
 
     try {
-      const input: CreatePatientInput = { name, email, phone }
+      const input: CreatePatientInput = {
+        name,
+        age: age ? Number(age) : undefined,
+        email,
+        phone
+      }
       const newPatient = await createPatientService(input)
       setPatients([newPatient, ...patients])
       setShowForm(false)
       setName("")
+      setAge("")
       setEmail("")
       setPhone("")
     } catch (err) {
@@ -54,11 +60,11 @@ function PatientsPage() {
   }
 
   const handleDeactivate = async (id: string) => {
-    if (!confirm("¿Estás seguro de desactivar este paciente?")) return
+    if (!confirm("Estas seguro de desactivar este paciente?")) return
 
     try {
       await deactivatePatientService(id)
-      setPatients(patients.filter(p => p.id !== id))
+      setPatients(patients.filter((patient) => patient.id !== id))
     } catch (err) {
       setError("Error al desactivar el paciente")
     }
@@ -76,9 +82,7 @@ function PatientsPage() {
         </button>
       </div>
 
-      {error && (
-        <p className="text-red-500 text-sm mb-4">{error}</p>
-      )}
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
       {showForm && (
         <form
@@ -87,7 +91,7 @@ function PatientsPage() {
         >
           <h3 className="text-lg font-medium text-gray-700">Nuevo paciente</h3>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-gray-700">
                 Nombre <span className="text-red-500">*</span>
@@ -103,6 +107,18 @@ function PatientsPage() {
             </div>
 
             <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-gray-700">Edad</label>
+              <input
+                type="number"
+                min="0"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Ej: 8"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
@@ -114,7 +130,7 @@ function PatientsPage() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">Teléfono</label>
+              <label className="text-sm font-medium text-gray-700">Telefono</label>
               <input
                 type="text"
                 value={phone}
@@ -141,7 +157,7 @@ function PatientsPage() {
         <p className="text-gray-500 text-sm">Cargando pacientes...</p>
       ) : patients.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-          <p className="text-gray-400">No hay pacientes registrados todavía.</p>
+          <p className="text-gray-400">No hay pacientes registrados todavia.</p>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -149,24 +165,26 @@ function PatientsPage() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-6 py-3 text-gray-600 font-medium">Nombre</th>
+                <th className="text-left px-6 py-3 text-gray-600 font-medium">Edad</th>
                 <th className="text-left px-6 py-3 text-gray-600 font-medium">Email</th>
-                <th className="text-left px-6 py-3 text-gray-600 font-medium">Teléfono</th>
+                <th className="text-left px-6 py-3 text-gray-600 font-medium">Telefono</th>
                 <th className="text-left px-6 py-3 text-gray-600 font-medium">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {patients.map(patient => (
+              {patients.map((patient) => (
                 <tr key={patient.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
-                        <Link
-                            to={`/patients/${patient.id}`}
-                            className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
-                        >
-                            {patient.name}
-                        </Link>
-                    </td>
-                  <td className="px-6 py-4 text-gray-500">{patient.email || "—"}</td>
-                  <td className="px-6 py-4 text-gray-500">{patient.phone || "—"}</td>
+                  <td className="px-6 py-4">
+                    <Link
+                      to={`/patients/${patient.id}`}
+                      className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                    >
+                      {patient.name}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 text-gray-500">{patient.age ?? "-"}</td>
+                  <td className="px-6 py-4 text-gray-500">{patient.email || "-"}</td>
+                  <td className="px-6 py-4 text-gray-500">{patient.phone || "-"}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => handleDeactivate(patient.id)}
