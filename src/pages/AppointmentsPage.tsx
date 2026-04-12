@@ -91,7 +91,9 @@ function AppointmentsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState("")
+  const [message, setMessage] = useState("")
   const [saving, setSaving] = useState(false)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   const [patientId, setPatientId] = useState("")
   const [datetime, setDatetime] = useState("")
@@ -163,6 +165,7 @@ function AppointmentsPage() {
     e.preventDefault()
     setSaving(true)
     setError("")
+    setMessage("")
 
     try {
       const input: CreateAppointmentInput = {
@@ -178,6 +181,7 @@ function AppointmentsPage() {
       setDatetime("")
       setNotes("")
       setReminderScheduledAts(createEmptyReminderList())
+      setMessage("Cita guardada correctamente")
     } catch (err) {
       setError("Error al crear la cita")
     } finally {
@@ -186,6 +190,10 @@ function AppointmentsPage() {
   }
 
   const handleUpdate = async (id: string) => {
+    setUpdatingId(id)
+    setError("")
+    setMessage("")
+
     try {
       const updated = await updateAppointmentService(id, {
         datetime: editDatetime || undefined,
@@ -195,8 +203,11 @@ function AppointmentsPage() {
       })
       setAppointments(appointments.map((appointment) => appointment.id === id ? updated : appointment))
       setEditingId(null)
+      setMessage("Cita actualizada correctamente")
     } catch (err) {
       setError("Error al actualizar la cita")
+    } finally {
+      setUpdatingId(null)
     }
   }
 
@@ -245,13 +256,19 @@ function AppointmentsPage() {
       </div>
 
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+      {message && <p className="text-green-600 text-sm mb-4">{message}</p>}
 
       {showForm && (
         <form
           onSubmit={handleCreate}
           className="bg-white rounded-lg shadow-sm p-6 mb-6 flex flex-col gap-4"
         >
-          <h3 className="text-base font-medium text-gray-700">Nueva cita</h3>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-base font-medium text-gray-700">Nueva cita</h3>
+            {saving && (
+              <span className="text-sm text-indigo-600 font-medium">Guardando cita...</span>
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
@@ -261,6 +278,7 @@ function AppointmentsPage() {
               <select
                 value={patientId}
                 onChange={(e) => setPatientId(e.target.value)}
+                disabled={saving}
                 className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
@@ -279,6 +297,7 @@ function AppointmentsPage() {
                 type="datetime-local"
                 value={datetime}
                 onChange={(e) => setDatetime(e.target.value)}
+                disabled={saving}
                 className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
@@ -291,6 +310,7 @@ function AppointmentsPage() {
               <button
                 type="button"
                 onClick={() => addReminderField(setReminderScheduledAts, reminderScheduledAts)}
+                disabled={saving}
                 className="text-sm text-indigo-600 hover:text-indigo-700"
               >
                 + Agregar recordatorio
@@ -303,7 +323,7 @@ function AppointmentsPage() {
                   key={option.label}
                   type="button"
                   onClick={() => applyQuickReminder(datetime, option.minutesBefore, reminderScheduledAts, setReminderScheduledAts)}
-                  disabled={!datetime}
+                  disabled={!datetime || saving}
                   className="rounded-full border border-indigo-200 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
                 >
                   {option.label}
@@ -317,12 +337,14 @@ function AppointmentsPage() {
                   type="datetime-local"
                   value={reminder}
                   onChange={(e) => updateReminderAtIndex(reminderScheduledAts, index, e.target.value, setReminderScheduledAts)}
+                  disabled={saving}
                   className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <button
                   type="button"
                   onClick={() => removeReminderField(setReminderScheduledAts, reminderScheduledAts, index)}
-                  className="text-sm text-red-500 hover:text-red-600 px-2 py-2"
+                  disabled={saving}
+                  className="text-sm text-red-500 hover:text-red-600 px-2 py-2 disabled:text-gray-300"
                 >
                   Quitar
                 </button>
@@ -335,6 +357,7 @@ function AppointmentsPage() {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              disabled={saving}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
               rows={2}
               placeholder="Observaciones sobre la cita..."
@@ -345,7 +368,7 @@ function AppointmentsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Guardando..." : "Guardar cita"}
             </button>
@@ -363,6 +386,9 @@ function AppointmentsPage() {
             <div key={appointment.id} className="bg-white rounded-lg shadow-sm p-5">
               {editingId === appointment.id ? (
                 <div className="flex flex-col gap-3">
+                  {updatingId === appointment.id && (
+                    <p className="text-sm text-indigo-600 font-medium">Guardando cambios de la cita...</p>
+                  )}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-gray-700">Fecha y hora</label>
@@ -370,6 +396,7 @@ function AppointmentsPage() {
                         type="datetime-local"
                         value={editDatetime}
                         onChange={(e) => setEditDatetime(e.target.value)}
+                        disabled={updatingId === appointment.id}
                         className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -378,6 +405,7 @@ function AppointmentsPage() {
                       <select
                         value={editStatus}
                         onChange={(e) => setEditStatus(e.target.value)}
+                        disabled={updatingId === appointment.id}
                         className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       >
                         {STATUS_OPTIONS.map((opt) => (
@@ -393,6 +421,7 @@ function AppointmentsPage() {
                       <button
                         type="button"
                         onClick={() => addReminderField(setEditReminderScheduledAts, editReminderScheduledAts)}
+                        disabled={updatingId === appointment.id}
                         className="text-sm text-indigo-600 hover:text-indigo-700"
                       >
                         + Agregar recordatorio
@@ -405,7 +434,7 @@ function AppointmentsPage() {
                           key={option.label}
                           type="button"
                           onClick={() => applyQuickReminder(editDatetime, option.minutesBefore, editReminderScheduledAts, setEditReminderScheduledAts)}
-                          disabled={!editDatetime}
+                          disabled={!editDatetime || updatingId === appointment.id}
                           className="rounded-full border border-indigo-200 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
                         >
                           {option.label}
@@ -419,12 +448,14 @@ function AppointmentsPage() {
                           type="datetime-local"
                           value={reminder}
                           onChange={(e) => updateReminderAtIndex(editReminderScheduledAts, index, e.target.value, setEditReminderScheduledAts)}
+                          disabled={updatingId === appointment.id}
                           className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                         <button
                           type="button"
                           onClick={() => removeReminderField(setEditReminderScheduledAts, editReminderScheduledAts, index)}
-                          className="text-sm text-red-500 hover:text-red-600 px-2 py-2"
+                          disabled={updatingId === appointment.id}
+                          className="text-sm text-red-500 hover:text-red-600 px-2 py-2 disabled:text-gray-300"
                         >
                           Quitar
                         </button>
@@ -437,6 +468,7 @@ function AppointmentsPage() {
                     <textarea
                       value={editNotes}
                       onChange={(e) => setEditNotes(e.target.value)}
+                      disabled={updatingId === appointment.id}
                       className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                       rows={2}
                     />
@@ -444,15 +476,17 @@ function AppointmentsPage() {
                   <div className="flex gap-2 justify-end">
                     <button
                       onClick={() => setEditingId(null)}
-                      className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5"
+                      disabled={updatingId === appointment.id}
+                      className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 disabled:text-gray-300"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={() => handleUpdate(appointment.id)}
-                      className="bg-indigo-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
+                      disabled={updatingId === appointment.id}
+                      className="bg-indigo-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Guardar
+                      {updatingId === appointment.id ? "Guardando..." : "Guardar"}
                     </button>
                   </div>
                 </div>

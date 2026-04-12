@@ -5,8 +5,7 @@ import type {
   AuthResponse,
   ValidatePasswordSetupResponse
 } from "../types/auth.types"
-
-const API_URL = "http://localhost:3000/api/v1"
+import { API_URL } from "./api"
 
 export const loginService = async (data: LoginInput): Promise<AuthResponse> => {
   const response = await axios.post(`${API_URL}/auth/login`, data)

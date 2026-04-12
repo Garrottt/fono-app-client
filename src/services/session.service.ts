@@ -1,15 +1,10 @@
 import axios from "axios"
 import type { Session, CreateSessionInput } from "../types/session.types"
-
-const API_URL = "http://localhost:3000/api/v1"
-
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`
-})
+import { API_URL, getAuthHeaders } from "./api"
 
 export const getSessionsService = async (patientId: string): Promise<Session[]> => {
   const response = await axios.get(`${API_URL}/patients/${patientId}/sessions`, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
   return response.data.sessions
 }
@@ -21,7 +16,7 @@ export const createSessionService = async (
   const dateWithTime = data.date + "T12:00:00"
   const response = await axios.post(`${API_URL}/patients/${patientId}/sessions`,
     { ...data, date: dateWithTime },
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
   return response.data.session
 }
@@ -34,7 +29,7 @@ export const updateSessionService = async (
   const response = await axios.put(
     `${API_URL}/patients/${patientId}/sessions/${id}`,
     data,
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
   return response.data.session
 }
@@ -45,6 +40,6 @@ export const deleteSessionService = async (
 ): Promise<void> => {
   await axios.delete(
     `${API_URL}/patients/${patientId}/sessions/${id}`,
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
 }

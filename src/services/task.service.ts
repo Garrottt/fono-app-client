@@ -1,15 +1,10 @@
 import axios from "axios"
 import type { Task, CreateTaskInput } from "../types/task.types"
-
-const API_URL = "http://localhost:3000/api/v1"
-
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`
-})
+import { API_URL, getAuthHeaders } from "./api"
 
 export const getTasksService = async (patientId: string): Promise<Task[]> => {
   const response = await axios.get(`${API_URL}/patients/${patientId}/tasks`, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
   return response.data.tasks
 }
@@ -26,7 +21,7 @@ export const createTaskService = async (
 
   const response = await axios.post(`${API_URL}/patients/${patientId}/tasks`, formData, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      ...getAuthHeaders(),
       "Content-Type": "multipart/form-data"
     }
   })
@@ -38,7 +33,7 @@ export const deleteTaskService = async (
   taskId: string
 ): Promise<void> => {
   await axios.delete(`${API_URL}/patients/${patientId}/tasks/${taskId}`, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
 }
 export const updateTaskService = async (
@@ -58,7 +53,7 @@ export const updateTaskService = async (
     formData,
     {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        ...getAuthHeaders(),
         "Content-Type": "multipart/form-data"
       }
     }

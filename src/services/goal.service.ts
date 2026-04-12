@@ -1,15 +1,10 @@
 import axios from "axios"
 import type { Goal, OperationalGoal, CreateGoalInput, CreateOperationalGoalInput } from "../types/goal.types"
-
-const API_URL = "http://localhost:3000/api/v1"
-
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`
-})
+import { API_URL, getAuthHeaders } from "./api"
 
 export const getGoalsService = async (patientId: string): Promise<Goal[]> => {
   const response = await axios.get(`${API_URL}/patients/${patientId}/goals`, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
   return response.data.goals
 }
@@ -24,7 +19,7 @@ export const createGoalService = async (
       startDate: data.startDate + "T12:00:00",
       endDate: data.endDate + "T12:00:00"
     },
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
   return response.data.goal
 }
@@ -37,7 +32,7 @@ export const createOperationalGoalService = async (
   const response = await axios.post(
     `${API_URL}/patients/${patientId}/goals/${goalId}/operational`,
     data,
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
   return response.data.operationalGoal
 }
@@ -52,7 +47,7 @@ export const updateOperationalGoalService = async (
   const response = await axios.put(
     `${API_URL}/patients/${patientId}/goals/operational/${operationalId}`,
     { completed, status, notes },
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
   return response.data.operationalGoal
 }
@@ -64,7 +59,7 @@ export const updateGoalDescriptionService = async (
   const response = await axios.patch(
     `${API_URL}/patients/${patientId}/goals/${goalId}`,
     data,
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
   return response.data.goal
 }
@@ -75,7 +70,7 @@ export const deleteOperationalGoalService = async (
 ): Promise<void> => {
   await axios.delete(
     `${API_URL}/patients/${patientId}/goals/operational/${operationalId}`,
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
 }
 
@@ -85,6 +80,6 @@ export const deleteGoalService = async (
 ): Promise<void> => {
   await axios.delete(
     `${API_URL}/patients/${patientId}/goals/${goalId}`,
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
 }

@@ -1,15 +1,10 @@
 import axios from "axios"
 import type { PreLavadoEvaluation, UpdatePreLavadoInput } from "../types/prelavado.types"
-
-const API_URL = "http://localhost:3000/api/v1"
-
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`
-})
+import { API_URL, getAuthHeaders } from "./api"
 
 export const getPreLavadoService = async (patientId: string): Promise<PreLavadoEvaluation | null> => {
   const response = await axios.get(`${API_URL}/patients/${patientId}/pre-lavado`, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
 
   return response.data.evaluation
@@ -20,7 +15,7 @@ export const savePreLavadoService = async (
   data: UpdatePreLavadoInput
 ): Promise<{ evaluation: PreLavadoEvaluation; message: string }> => {
   const response = await axios.put(`${API_URL}/patients/${patientId}/pre-lavado`, data, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
 
   return response.data
@@ -28,7 +23,7 @@ export const savePreLavadoService = async (
 
 export const downloadPreLavadoPdfService = async (patientId: string): Promise<Blob> => {
   const response = await axios.get(`${API_URL}/patients/${patientId}/pre-lavado/pdf`, {
-    headers: getHeaders(),
+    headers: getAuthHeaders(),
     responseType: "blob"
   })
 

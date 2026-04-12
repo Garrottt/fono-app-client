@@ -1,29 +1,24 @@
 import axios from "axios"
 import type { Patient, CreatePatientInput, UpdatePatientInput, ConfigurePortalAccessInput } from "../types/patient.types"
-
-const API_URL = "http://localhost:3000/api/v1"
-
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`
-})
+import { API_URL, getAuthHeaders } from "./api"
 
 export const getPatientsService = async (): Promise<Patient[]> => {
   const response = await axios.get(`${API_URL}/patients`, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
   return response.data.patients
 }
 
 export const createPatientService = async (data: CreatePatientInput): Promise<Patient> => {
   const response = await axios.post(`${API_URL}/patients`, data, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
   return response.data.patient
 }
 
 export const updatePatientService = async (id: string, data: UpdatePatientInput): Promise<Patient> => {
   const response = await axios.put(`${API_URL}/patients/${id}`, data, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
   return response.data.patient
 }
@@ -33,14 +28,14 @@ export const configurePortalAccessService = async (
   data: ConfigurePortalAccessInput
 ): Promise<{ user: { id: string; email: string; patientId: string }; message: string }> => {
   const response = await axios.put(`${API_URL}/patients/${id}/portal-access`, data, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
   return response.data
 }
 
 export const deactivatePatientService = async (id: string): Promise<void> => {
   await axios.delete(`${API_URL}/patients/${id}`, {
-    headers: getHeaders()
+    headers: getAuthHeaders()
   })
 }
 
@@ -50,7 +45,7 @@ export const updatePatientDiagnosisService = async (
 ): Promise<Patient> => {
   const response = await axios.put(`${API_URL}/patients/${id}`,
     { diagnosis },
-    { headers: getHeaders() }
+    { headers: getAuthHeaders() }
   )
   return response.data.patient
 }
