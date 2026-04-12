@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import type { Patient } from "../types/patient.types"
 import type { Session, CreateSessionInput } from "../types/session.types"
-import { getPatientsService } from "../services/patient.service"
+import { getPatientsService, updatePatientDiagnosisService } from "../services/patient.service"
 import {
   getSessionsService,
   createSessionService,
@@ -27,6 +27,8 @@ function PatientDetailPage() {
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null)
   const [editDate, setEditDate] = useState("")
   const [editWhatWasDone, setEditWhatWasDone] = useState("")
+  const [editingDiagnosis, setEditingDiagnosis] = useState(false)
+  const [diagnosisText, setDiagnosisText] = useState("")
 
   useEffect(() => {
     if (id) fetchData(id)
@@ -84,6 +86,16 @@ function PatientDetailPage() {
       setError("Error al actualizar la sesión")
     }
   }
+  const handleUpdateDiagnosis = async () => {
+  if (!id) return
+  try {
+    const updated = await updatePatientDiagnosisService(id, diagnosisText)
+    setPatient(updated)
+    setEditingDiagnosis(false)
+  } catch (err) {
+    setError("Error al actualizar el diagnóstico")
+  }
+}
 
   const handleDeleteSession = async (sessionId: string) => {
     if (!confirm("¿Estás seguro de eliminar esta sesión?")) return
@@ -118,16 +130,73 @@ function PatientDetailPage() {
         <h2 className="text-2xl font-semibold text-gray-800">{patient?.name}</h2>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-5 mb-6 flex gap-8">
-        <div>
-          <p className="text-xs text-gray-400 mb-1">Email</p>
-          <p className="text-sm text-gray-700">{patient?.email || "—"}</p>
+      <div className="bg-white rounded-lg shadow-sm p-5 mb-6">
+  <div className="flex gap-8 items-start">
+    <div>
+      <p className="text-xs text-gray-400 mb-1">Email</p>
+      <p className="text-sm text-gray-700">{patient?.email || "—"}</p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-400 mb-1">Teléfono</p>
+      <p className="text-sm text-gray-700">{patient?.phone || "—"}</p>
+    </div>
+    <div className="flex-1">
+      <p className="text-xs text-gray-400 mb-1">Diagnóstico</p>
+      {editingDiagnosis ? (
+        <div className="flex flex-col gap-2">
+          <textarea
+            value={diagnosisText}
+            onChange={(e) => setDiagnosisText(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            rows={2}
+            placeholder="Ej: Dislalia funcional, retraso en el lenguaje..."
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleUpdateDiagnosis}
+              className="bg-indigo-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
+            >
+              Guardar
+            </button>
+            <button
+              onClick={() => setEditingDiagnosis(false)}
+              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5"
+            >
+              Cancelar
+            </button>
+          </div>
         </div>
-        <div>
-          <p className="text-xs text-gray-400 mb-1">Teléfono</p>
-          <p className="text-sm text-gray-700">{patient?.phone || "—"}</p>
+      ) : (
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-gray-700 flex-1">
+            {patient?.diagnosis || <span className="text-gray-400 italic">Sin diagnóstico</span>}
+          </p>
+          <button
+            onClick={() => {
+              setEditingDiagnosis(true)
+              setDiagnosisText(patient?.diagnosis || "")
+            }}
+            className="text-indigo-500 hover:text-indigo-700 text-xs font-medium transition-colors"
+          >
+            {patient?.diagnosis ? "Editar" : "Agregar"}
+          </button>
+          {patient?.diagnosis && (
+            <button
+              onClick={async () => {
+                if (!confirm("¿Eliminar el diagnóstico?")) return
+                setDiagnosisText("")
+                await handleUpdateDiagnosis()
+              }}
+              className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors"
+            >
+              Eliminar
+            </button>
+          )}
         </div>
-      </div>
+      )}
+    </div>
+  </div>
+</div>
 
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium text-gray-700">Sesiones</h3>

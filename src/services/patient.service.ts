@@ -33,3 +33,13 @@ export const deactivatePatientService = async (id: string): Promise<void> => {
     headers: getHeaders()
   })
 }
+export const updatePatientDiagnosisService = async (
+  id: string,
+  diagnosis: string
+): Promise<Patient> => {
+  const response = await axios.put(`${API_URL}/patients/${id}`,
+    { diagnosis },
+    { headers: getHeaders() }
+  )
+  return response.data.patient
+}
