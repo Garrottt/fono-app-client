@@ -5,6 +5,7 @@ import DashboardPage from "./pages/DashboardPage"
 import PatientsPage from "./pages/PatientsPage"
 import PatientDetailPage from "./pages/PatientDetailPage"
 import PatientPortalPage from "./pages/PatientPortalPage"
+import AppointmentsPage from "./pages/AppointmentsPage"
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
@@ -40,7 +41,10 @@ function AppRoutes() {
         <Route path="dashboard" element={<p className="p-6 text-gray-500">Seleccioná una opción del menú.</p>} />
         <Route path="patients" element={<PatientsPage />} />
         <Route path="patients/:id" element={<PatientDetailPage />} />
+        <Route path="appointments" element={<AppointmentsPage />} />
       </Route>
+
+      
 
       {/* Portal del paciente */}
       <Route
@@ -66,5 +70,6 @@ function App() {
     </BrowserRouter>
   )
 }
+
 
 export default App

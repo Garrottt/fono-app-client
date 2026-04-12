@@ -31,6 +31,12 @@ function DashboardPage() {
           >
             Pacientes
           </Link>
+          <Link
+            to="/appointments"
+            className="px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          >
+             Citas
+          </Link>
         </nav>
         <div className="p-3 border-t border-gray-100">
           <div className="px-3 py-2 text-xs text-gray-400">{user?.name}</div>
