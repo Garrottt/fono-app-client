@@ -13,7 +13,7 @@ const STATUS_OPTIONS = [
   { value: "SCHEDULED", label: "Programada" },
   { value: "COMPLETED", label: "Completada" },
   { value: "CANCELLED", label: "Cancelada" },
-  { value: "NO_SHOW", label: "No asistio" },
+  { value: "NO_SHOW", label: "No asistio" }
 ]
 
 const CHILE_TIMEZONE = "America/Santiago"
@@ -138,6 +138,9 @@ function AppointmentsPage() {
     setter([...reminders, ""])
   }
 
+  const normalizeReminderPayload = (reminders: string[]) =>
+    reminders.map((reminder) => reminder.trim()).filter(Boolean)
+
   const applyQuickReminder = (
     appointmentDateTime: string,
     minutesBefore: number,
@@ -157,9 +160,6 @@ function AppointmentsPage() {
     const next = reminders.filter((_, reminderIndex) => reminderIndex !== index)
     setter(next.length > 0 ? next : createEmptyReminderList())
   }
-
-  const normalizeReminderPayload = (reminders: string[]) =>
-    reminders.map((reminder) => reminder.trim()).filter(Boolean)
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -212,7 +212,7 @@ function AppointmentsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Estas seguro de eliminar esta cita?")) return
+    if (!confirm("Estas seguro de eliminar esta cita?")) return
     try {
       await deleteAppointmentService(id)
       setAppointments(appointments.filter((appointment) => appointment.id !== id))
@@ -235,42 +235,45 @@ function AppointmentsPage() {
       NO_SHOW: "No asistio"
     }
     return (
-      <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles[status] || styles.SCHEDULED}`}>
+      <span className={`rounded-full px-2 py-1 text-xs font-medium ${styles[status] || styles.SCHEDULED}`}>
         {labels[status] || status}
       </span>
     )
   }
 
-  if (loading) return <p className="p-6 text-gray-500 text-sm">Cargando...</p>
+  if (loading) return <p className="p-4 text-sm text-gray-500 sm:p-6">Cargando...</p>
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">Citas</h2>
+    <div className="p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-800">Citas</h2>
+          <p className="mt-1 text-sm text-gray-500">Organiza el calendario y sus recordatorios desde tablet o escritorio.</p>
+        </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 md:w-auto"
         >
           {showForm ? "Cancelar" : "+ Nueva cita"}
         </button>
       </div>
 
-      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-      {message && <p className="text-green-600 text-sm mb-4">{message}</p>}
+      {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
+      {message && <p className="mb-4 text-sm text-green-600">{message}</p>}
 
       {showForm && (
         <form
           onSubmit={handleCreate}
-          className="bg-white rounded-lg shadow-sm p-6 mb-6 flex flex-col gap-4"
+          className="mb-6 flex flex-col gap-4 rounded-xl bg-white p-5 shadow-sm sm:p-6"
         >
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-base font-medium text-gray-700">Nueva cita</h3>
             {saving && (
-              <span className="text-sm text-indigo-600 font-medium">Guardando cita...</span>
+              <span className="text-sm font-medium text-indigo-600">Guardando cita...</span>
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-gray-700">
                 Paciente <span className="text-red-500">*</span>
@@ -279,7 +282,7 @@ function AppointmentsPage() {
                 value={patientId}
                 onChange={(e) => setPatientId(e.target.value)}
                 disabled={saving}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
                 <option value="">Selecciona un paciente</option>
@@ -298,20 +301,20 @@ function AppointmentsPage() {
                 value={datetime}
                 onChange={(e) => setDatetime(e.target.value)}
                 disabled={saving}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <label className="text-sm font-medium text-gray-700">Recordatorios</label>
               <button
                 type="button"
                 onClick={() => addReminderField(setReminderScheduledAts, reminderScheduledAts)}
                 disabled={saving}
-                className="text-sm text-indigo-600 hover:text-indigo-700"
+                className="text-left text-sm text-indigo-600 hover:text-indigo-700 sm:text-right"
               >
                 + Agregar recordatorio
               </button>
@@ -332,19 +335,19 @@ function AppointmentsPage() {
             </div>
 
             {reminderScheduledAts.map((reminder, index) => (
-              <div key={`create-reminder-${index}`} className="flex items-center gap-2">
+              <div key={`create-reminder-${index}`} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <input
                   type="datetime-local"
                   value={reminder}
                   onChange={(e) => updateReminderAtIndex(reminderScheduledAts, index, e.target.value, setReminderScheduledAts)}
                   disabled={saving}
-                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <button
                   type="button"
                   onClick={() => removeReminderField(setReminderScheduledAts, reminderScheduledAts, index)}
                   disabled={saving}
-                  className="text-sm text-red-500 hover:text-red-600 px-2 py-2 disabled:text-gray-300"
+                  className="px-2 py-2 text-left text-sm text-red-500 hover:text-red-600 disabled:text-gray-300"
                 >
                   Quitar
                 </button>
@@ -358,8 +361,8 @@ function AppointmentsPage() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               disabled={saving}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-              rows={2}
+              className="resize-none border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              rows={3}
               placeholder="Observaciones sobre la cita..."
             />
           </div>
@@ -368,7 +371,7 @@ function AppointmentsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               {saving ? "Guardando..." : "Guardar cita"}
             </button>
@@ -377,19 +380,20 @@ function AppointmentsPage() {
       )}
 
       {appointments.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+        <div className="rounded-xl bg-white p-8 text-center shadow-sm">
           <p className="text-gray-400">No hay citas registradas todavia.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {appointments.map((appointment) => (
-            <div key={appointment.id} className="bg-white rounded-lg shadow-sm p-5">
+            <div key={appointment.id} className="rounded-xl bg-white p-5 shadow-sm">
               {editingId === appointment.id ? (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                   {updatingId === appointment.id && (
-                    <p className="text-sm text-indigo-600 font-medium">Guardando cambios de la cita...</p>
+                    <p className="text-sm font-medium text-indigo-600">Guardando cambios de la cita...</p>
                   )}
-                  <div className="grid grid-cols-2 gap-4">
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-gray-700">Fecha y hora</label>
                       <input
@@ -397,7 +401,7 @@ function AppointmentsPage() {
                         value={editDatetime}
                         onChange={(e) => setEditDatetime(e.target.value)}
                         disabled={updatingId === appointment.id}
-                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -406,7 +410,7 @@ function AppointmentsPage() {
                         value={editStatus}
                         onChange={(e) => setEditStatus(e.target.value)}
                         disabled={updatingId === appointment.id}
-                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       >
                         {STATUS_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -416,13 +420,13 @@ function AppointmentsPage() {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <label className="text-sm font-medium text-gray-700">Recordatorios</label>
                       <button
                         type="button"
                         onClick={() => addReminderField(setEditReminderScheduledAts, editReminderScheduledAts)}
                         disabled={updatingId === appointment.id}
-                        className="text-sm text-indigo-600 hover:text-indigo-700"
+                        className="text-left text-sm text-indigo-600 hover:text-indigo-700 sm:text-right"
                       >
                         + Agregar recordatorio
                       </button>
@@ -443,19 +447,19 @@ function AppointmentsPage() {
                     </div>
 
                     {editReminderScheduledAts.map((reminder, index) => (
-                      <div key={`edit-reminder-${index}`} className="flex items-center gap-2">
+                      <div key={`edit-reminder-${index}`} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <input
                           type="datetime-local"
                           value={reminder}
                           onChange={(e) => updateReminderAtIndex(editReminderScheduledAts, index, e.target.value, setEditReminderScheduledAts)}
                           disabled={updatingId === appointment.id}
-                          className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="flex-1 border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                         <button
                           type="button"
                           onClick={() => removeReminderField(setEditReminderScheduledAts, editReminderScheduledAts, index)}
                           disabled={updatingId === appointment.id}
-                          className="text-sm text-red-500 hover:text-red-600 px-2 py-2 disabled:text-gray-300"
+                          className="px-2 py-2 text-left text-sm text-red-500 hover:text-red-600 disabled:text-gray-300"
                         >
                           Quitar
                         </button>
@@ -469,31 +473,32 @@ function AppointmentsPage() {
                       value={editNotes}
                       onChange={(e) => setEditNotes(e.target.value)}
                       disabled={updatingId === appointment.id}
-                      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                      rows={2}
+                      className="resize-none border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      rows={3}
                     />
                   </div>
-                  <div className="flex gap-2 justify-end">
+
+                  <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
                     <button
                       onClick={() => setEditingId(null)}
                       disabled={updatingId === appointment.id}
-                      className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 disabled:text-gray-300"
+                      className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 disabled:text-gray-300"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={() => handleUpdate(appointment.id)}
                       disabled={updatingId === appointment.id}
-                      className="bg-indigo-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {updatingId === appointment.id ? "Guardando..." : "Guardar"}
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                       <p className="text-sm font-medium text-gray-800">
                         {appointment.patient?.name}
                       </p>
@@ -501,7 +506,7 @@ function AppointmentsPage() {
                     </div>
                     <p className="text-sm text-gray-500">{formatDatetime(appointment.datetime)}</p>
                     {appointment.notes && (
-                      <p className="text-xs text-gray-400 mt-1">{appointment.notes}</p>
+                      <p className="mt-1 text-xs text-gray-400">{appointment.notes}</p>
                     )}
                     {appointment.reminders.length > 0 && (
                       <div className="mt-2 flex flex-col gap-1">
@@ -513,7 +518,7 @@ function AppointmentsPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex gap-3 ml-4">
+                  <div className="flex gap-3 lg:ml-4">
                     <button
                       onClick={() => {
                         setEditingId(appointment.id)
@@ -526,13 +531,13 @@ function AppointmentsPage() {
                             : createEmptyReminderList()
                         )
                       }}
-                      className="text-indigo-500 hover:text-indigo-700 text-xs font-medium transition-colors"
+                      className="text-xs font-medium text-indigo-500 transition-colors hover:text-indigo-700"
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => handleDelete(appointment.id)}
-                      className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors"
+                      className="text-xs font-medium text-red-400 transition-colors hover:text-red-600"
                     >
                       Eliminar
                     </button>

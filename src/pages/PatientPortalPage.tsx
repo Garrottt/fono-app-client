@@ -5,10 +5,12 @@ import { getSessionsService } from "../services/session.service"
 import { getGoalsService } from "../services/goal.service"
 import { getTasksService } from "../services/task.service"
 import { getAppointmentsByPatientService } from "../services/appointment.service"
+import { API_URL } from "../services/api"
 import type { Session } from "../types/session.types"
 import type { Goal } from "../types/goal.types"
 import type { Task } from "../types/task.types"
 import type { Appointment } from "../types/appointment.types"
+import AppBrand from "../components/AppBrand"
 
 const CHILE_TIMEZONE = "America/Santiago"
 
@@ -51,17 +53,17 @@ function PatientPortalPage() {
     navigate("/login")
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("es-CL", {
+  const formatDate = (dateString: string) => (
+    new Date(dateString).toLocaleDateString("es-CL", {
       year: "numeric",
       month: "long",
       day: "numeric",
       timeZone: CHILE_TIMEZONE
     })
-  }
+  )
 
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString("es-CL", {
+  const formatDateTime = (dateString: string) => (
+    new Date(dateString).toLocaleString("es-CL", {
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -71,14 +73,16 @@ function PatientPortalPage() {
       hour12: false,
       timeZone: CHILE_TIMEZONE
     })
-  }
+  )
 
   const getFileIcon = (filetype: string) => {
-    if (filetype === "application/pdf") return "📄"
-    if (filetype.includes("word")) return "📝"
-    if (filetype.startsWith("image/")) return "🖼️"
-    return "📎"
+    if (filetype === "application/pdf") return "PDF"
+    if (filetype.includes("word")) return "WORD"
+    if (filetype.startsWith("image/")) return "IMG"
+    return "ARCH"
   }
+
+  const getFileUrl = (url: string) => new URL(url, API_URL).toString()
 
   const getAppointmentStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -92,11 +96,11 @@ function PatientPortalPage() {
       SCHEDULED: "Programada",
       COMPLETED: "Completada",
       CANCELLED: "Cancelada",
-      NO_SHOW: "No asistió"
+      NO_SHOW: "No asistio"
     }
 
     return (
-      <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles[status] || styles.SCHEDULED}`}>
+      <span className={`rounded-full px-2 py-1 text-xs font-medium ${styles[status] || styles.SCHEDULED}`}>
         {labels[status] || status}
       </span>
     )
@@ -114,21 +118,21 @@ function PatientPortalPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-indigo-600">Fono App</h1>
+      <header className="flex items-center justify-between bg-white px-6 py-4 shadow-sm">
+        <AppBrand compact />
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">Hola, {user?.name}</span>
           <button
             onClick={handleLogout}
-            className="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-600 hover:bg-gray-50 transition-colors"
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50"
           >
-            Cerrar sesión
+            Cerrar sesion
           </button>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto p-6">
-        <div className="flex gap-1 bg-white rounded-lg shadow-sm p-1 mb-6">
+      <main className="mx-auto max-w-3xl p-6">
+        <div className="mb-6 flex gap-1 rounded-lg bg-white p-1 shadow-sm">
           {[
             { key: "sessions", label: "Sesiones" },
             { key: "goals", label: "Objetivos" },
@@ -138,7 +142,7 @@ function PatientPortalPage() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as typeof activeTab)}
-              className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.key
                   ? "bg-indigo-600 text-white"
                   : "text-gray-600 hover:bg-gray-50"
@@ -150,19 +154,57 @@ function PatientPortalPage() {
         </div>
 
         {loading ? (
-          <p className="text-gray-400 text-sm text-center">Cargando...</p>
+          <p className="text-center text-sm text-gray-400">Cargando...</p>
         ) : (
           <>
             {activeTab === "sessions" && (
               <div className="flex flex-col gap-3">
                 {sessions.length === 0 ? (
-                  <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                    <p className="text-gray-400">No hay sesiones registradas todavía.</p>
+                  <div className="rounded-lg bg-white p-8 text-center shadow-sm">
+                    <p className="text-gray-400">No hay sesiones registradas todavia.</p>
                   </div>
                 ) : sessions.map((session) => (
-                  <div key={session.id} className="bg-white rounded-lg shadow-sm p-5">
-                    <p className="text-xs text-gray-400 mb-2">{formatDate(session.date)}</p>
-                    <p className="text-sm text-gray-700 leading-relaxed">{session.whatWasDone}</p>
+                  <div key={session.id} className="rounded-lg bg-white p-5 shadow-sm">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <p className="text-xs text-gray-400">{formatDate(session.date)}</p>
+                      <span className="rounded-full bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700">
+                        Sesion {session.sessionNumber}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-relaxed text-gray-700">{session.whatWasDone}</p>
+
+                    {session.sessionTasks.length > 0 && (
+                      <div className="mt-4 space-y-3">
+                        <p className="text-xs uppercase tracking-wide text-gray-400">Indicaciones y material</p>
+                        {session.sessionTasks.map((sessionTask, index) => (
+                          <div key={sessionTask.id} className="rounded-lg border border-gray-200 p-4">
+                            <p className="text-sm font-medium text-gray-800">
+                              {index + 1}. {sessionTask.title}
+                            </p>
+                            {sessionTask.description && (
+                              <p className="mt-1 text-sm leading-relaxed text-gray-500">{sessionTask.description}</p>
+                            )}
+                            {sessionTask.files.length > 0 && (
+                              <div className="mt-3 flex flex-col gap-1">
+                                {sessionTask.files.map((file) => (
+                                  <a
+                                    key={file.id}
+                                    href={getFileUrl(file.url)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-xs text-indigo-600 transition-colors hover:text-indigo-800"
+                                  >
+                                    <span>{getFileIcon(file.filetype)}</span>
+                                    <span>{file.filename}</span>
+                                    <span className="text-gray-400">- Descargar</span>
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -171,19 +213,19 @@ function PatientPortalPage() {
             {activeTab === "goals" && (
               <div className="flex flex-col gap-4">
                 {goals.length === 0 ? (
-                  <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                    <p className="text-gray-400">No hay objetivos registrados todavía.</p>
+                  <div className="rounded-lg bg-white p-8 text-center shadow-sm">
+                    <p className="text-gray-400">No hay objetivos registrados todavia.</p>
                   </div>
                 ) : goals.map((goal) => (
-                  <div key={goal.id} className="bg-white rounded-lg shadow-sm p-5">
-                    <div className="flex justify-between items-start mb-3">
+                  <div key={goal.id} className="rounded-lg bg-white p-5 shadow-sm">
+                    <div className="mb-3 flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-800 mb-1">{goal.description}</p>
+                        <p className="mb-1 text-sm font-medium text-gray-800">{goal.description}</p>
                         <p className="text-xs text-gray-400">
-                          {formatDate(goal.startDate)} → {formatDate(goal.endDate)}
+                          {formatDate(goal.startDate)} - {formatDate(goal.endDate)}
                         </p>
                       </div>
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full ml-4 ${
+                      <span className={`ml-4 rounded-full px-2 py-1 text-xs font-medium ${
                         goal.completed ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
                       }`}>
                         {goal.completed ? "Completado" : "En progreso"}
@@ -191,15 +233,15 @@ function PatientPortalPage() {
                     </div>
                     {goal.operationalGoals.length > 0 && (
                       <div className="flex flex-col gap-2">
-                        {goal.operationalGoals.map((op) => (
-                          <div key={op.id} className="flex items-center gap-3 p-2 rounded-md bg-gray-50">
-                            <div className={`w-2 h-2 rounded-full shrink-0 ${
-                              op.completed ? "bg-green-500" : "bg-gray-300"
+                        {goal.operationalGoals.map((operationalGoal) => (
+                          <div key={operationalGoal.id} className="flex items-center gap-3 rounded-md bg-gray-50 p-2">
+                            <div className={`h-2 w-2 shrink-0 rounded-full ${
+                              operationalGoal.completed ? "bg-green-500" : "bg-gray-300"
                             }`} />
-                            <span className={`text-sm flex-1 ${
-                              op.completed ? "line-through text-gray-400" : "text-gray-700"
+                            <span className={`flex-1 text-sm ${
+                              operationalGoal.completed ? "text-gray-400 line-through" : "text-gray-700"
                             }`}>
-                              {op.description}
+                              {operationalGoal.description}
                             </span>
                           </div>
                         ))}
@@ -213,33 +255,33 @@ function PatientPortalPage() {
             {activeTab === "tasks" && (
               <div className="flex flex-col gap-3">
                 {tasks.length === 0 ? (
-                  <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                    <p className="text-gray-400">No hay tareas asignadas todavía.</p>
+                  <div className="rounded-lg bg-white p-8 text-center shadow-sm">
+                    <p className="text-gray-400">No hay tareas asignadas todavia.</p>
                   </div>
                 ) : tasks.map((task) => (
-                  <div key={task.id} className="bg-white rounded-lg shadow-sm p-5">
-                    <p className="text-sm font-medium text-gray-800 mb-1">{task.title}</p>
+                  <div key={task.id} className="rounded-lg bg-white p-5 shadow-sm">
+                    <p className="mb-1 text-sm font-medium text-gray-800">{task.title}</p>
                     {task.description && (
-                      <p className="text-sm text-gray-500 leading-relaxed">{task.description}</p>
+                      <p className="text-sm leading-relaxed text-gray-500">{task.description}</p>
                     )}
                     {task.files && task.files.length > 0 && (
                       <div className="mt-3 flex flex-col gap-1">
                         {task.files.map((file) => (
                           <a
                             key={file.id}
-                            href={"http://localhost:3000" + file.url}
+                            href={getFileUrl(file.url)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
+                            className="inline-flex items-center gap-1.5 text-xs text-indigo-600 transition-colors hover:text-indigo-800"
                           >
                             <span>{getFileIcon(file.filetype)}</span>
                             <span>{file.filename}</span>
-                            <span className="text-gray-400">— Descargar</span>
+                            <span className="text-gray-400">- Descargar</span>
                           </a>
                         ))}
                       </div>
                     )}
-                    <p className="text-xs text-gray-400 mt-2">Asignada el {formatDate(task.assignedAt)}</p>
+                    <p className="mt-2 text-xs text-gray-400">Asignada el {formatDate(task.assignedAt)}</p>
                   </div>
                 ))}
               </div>
@@ -249,21 +291,21 @@ function PatientPortalPage() {
               <div className="flex flex-col gap-3">
                 <section className="flex flex-col gap-3">
                   <div className="px-1">
-                    <h2 className="text-sm font-semibold text-gray-800">Próximas citas</h2>
+                    <h2 className="text-sm font-semibold text-gray-800">Proximas citas</h2>
                   </div>
                   {upcomingAppointments.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                      <p className="text-gray-400">No tienes próximas citas registradas.</p>
+                    <div className="rounded-lg bg-white p-8 text-center shadow-sm">
+                      <p className="text-gray-400">No tienes proximas citas registradas.</p>
                     </div>
                   ) : upcomingAppointments.map((appointment) => (
-                    <div key={appointment.id} className="bg-white rounded-lg shadow-sm p-5">
-                      <div className="flex items-center gap-3 mb-2">
-                        <p className="text-sm font-medium text-gray-800">Próxima cita</p>
+                    <div key={appointment.id} className="rounded-lg bg-white p-5 shadow-sm">
+                      <div className="mb-2 flex items-center gap-3">
+                        <p className="text-sm font-medium text-gray-800">Proxima cita</p>
                         {getAppointmentStatusBadge(appointment.status)}
                       </div>
                       <p className="text-sm text-gray-700">{formatDateTime(appointment.datetime)}</p>
                       {appointment.notes && (
-                        <p className="text-sm text-gray-500 mt-2">{appointment.notes}</p>
+                        <p className="mt-2 text-sm text-gray-500">{appointment.notes}</p>
                       )}
                       {appointment.reminders.length > 0 && (
                         <div className="mt-3 flex flex-col gap-1">
@@ -281,23 +323,23 @@ function PatientPortalPage() {
                   ))}
                 </section>
 
-                <section className="flex flex-col gap-3 mt-4">
+                <section className="mt-4 flex flex-col gap-3">
                   <div className="px-1">
                     <h2 className="text-sm font-semibold text-gray-800">Citas anteriores</h2>
                   </div>
                   {pastAppointments.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <div className="rounded-lg bg-white p-8 text-center shadow-sm">
                       <p className="text-gray-400">No tienes citas anteriores registradas.</p>
                     </div>
                   ) : pastAppointments.map((appointment) => (
-                    <div key={appointment.id} className="bg-white rounded-lg shadow-sm p-5">
-                      <div className="flex items-center gap-3 mb-2">
+                    <div key={appointment.id} className="rounded-lg bg-white p-5 shadow-sm">
+                      <div className="mb-2 flex items-center gap-3">
                         <p className="text-sm font-medium text-gray-800">Cita anterior</p>
                         {getAppointmentStatusBadge(appointment.status)}
                       </div>
                       <p className="text-sm text-gray-700">{formatDateTime(appointment.datetime)}</p>
                       {appointment.notes && (
-                        <p className="text-sm text-gray-500 mt-2">{appointment.notes}</p>
+                        <p className="mt-2 text-sm text-gray-500">{appointment.notes}</p>
                       )}
                       {appointment.reminders.length > 0 && (
                         <div className="mt-3 flex flex-col gap-1">

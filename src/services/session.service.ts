@@ -1,6 +1,16 @@
 import axios from "axios"
-import type { Session, CreateSessionInput } from "../types/session.types"
+import type { Session, CreateSessionInput, UpdateSessionInput } from "../types/session.types"
+import type { FileRecord } from "../types/file.types"
 import { API_URL, getAuthHeaders } from "./api"
+
+const normalizeSessionDate = (date: string) => (
+  date.includes("T") ? date : `${date}T12:00:00`
+)
+
+const normalizeSessionPayload = <T extends { date?: string }>(data: T): T => ({
+  ...data,
+  ...(data.date ? { date: normalizeSessionDate(data.date) } : {})
+})
 
 export const getSessionsService = async (patientId: string): Promise<Session[]> => {
   const response = await axios.get(`${API_URL}/patients/${patientId}/sessions`, {
@@ -13,9 +23,8 @@ export const createSessionService = async (
   patientId: string,
   data: CreateSessionInput
 ): Promise<Session> => {
-  const dateWithTime = data.date + "T12:00:00"
   const response = await axios.post(`${API_URL}/patients/${patientId}/sessions`,
-    { ...data, date: dateWithTime },
+    normalizeSessionPayload(data),
     { headers: getAuthHeaders() }
   )
   return response.data.session
@@ -24,11 +33,11 @@ export const createSessionService = async (
 export const updateSessionService = async (
   patientId: string,
   id: string,
-  data: Partial<CreateSessionInput>
+  data: UpdateSessionInput
 ): Promise<Session> => {
   const response = await axios.put(
     `${API_URL}/patients/${patientId}/sessions/${id}`,
-    data,
+    normalizeSessionPayload(data),
     { headers: getAuthHeaders() }
   )
   return response.data.session
@@ -40,6 +49,41 @@ export const deleteSessionService = async (
 ): Promise<void> => {
   await axios.delete(
     `${API_URL}/patients/${patientId}/sessions/${id}`,
+    { headers: getAuthHeaders() }
+  )
+}
+
+export const uploadSessionTaskFileService = async (
+  patientId: string,
+  sessionId: string,
+  taskId: string,
+  file: File
+): Promise<FileRecord> => {
+  const formData = new FormData()
+  formData.append("file", file)
+
+  const response = await axios.post(
+    `${API_URL}/patients/${patientId}/sessions/${sessionId}/tasks/${taskId}/files`,
+    formData,
+    {
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "multipart/form-data"
+      }
+    }
+  )
+
+  return response.data.file
+}
+
+export const deleteSessionTaskFileService = async (
+  patientId: string,
+  sessionId: string,
+  taskId: string,
+  fileId: string
+): Promise<void> => {
+  await axios.delete(
+    `${API_URL}/patients/${patientId}/sessions/${sessionId}/tasks/${taskId}/files/${fileId}`,
     { headers: getAuthHeaders() }
   )
 }

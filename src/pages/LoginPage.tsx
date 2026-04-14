@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/authContext"
 import { loginService } from "../services/auth.service"
+import AppBrand from "../components/AppBrand"
 
 function LoginPage() {
   const [email, setEmail] = useState("")
@@ -21,18 +22,20 @@ function LoginPage() {
       const data = await loginService({ email, password })
       login(data.token, data.user)
       navigate("/dashboard")
-    } catch (err) {
-      setError("Email o contraseña incorrectos")
+    } catch {
+      setError("Email o contrasena incorrectos")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-3xl font-bold text-gray-800 mb-1">Fono App</h1>
-        <p className="text-gray-500 mb-6">Iniciá sesión para continuar</p>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-8 sm:px-6">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-md sm:p-8">
+        <div className="mb-4">
+          <AppBrand />
+        </div>
+        <p className="mb-6 text-gray-500">Inicia sesion para continuar</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
@@ -41,32 +44,32 @@ function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="tu@email.com"
               required
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Contraseña</label>
+            <label className="text-sm font-medium text-gray-700">Contrasena</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="••••••••"
+              className="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="********"
               required
             />
           </div>
 
           {error && (
-            <p className="text-red-500 text-sm">{error}</p>
+            <p className="text-sm text-red-500">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-indigo-600 text-white py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            className="mt-2 rounded-md bg-indigo-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Ingresando..." : "Ingresar"}
           </button>

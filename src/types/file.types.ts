@@ -5,4 +5,6 @@ export interface FileRecord {
   url: string
   filetype: string
   uploadedAt: string
+  taskId?: string
+  sessionTaskId?: string
 }

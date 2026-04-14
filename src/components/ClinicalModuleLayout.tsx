@@ -41,6 +41,7 @@ function ClinicalModuleLayout({
   children
 }: Props) {
   const [search, setSearch] = useState("")
+  const [showPatients, setShowPatients] = useState(false)
 
   const filteredPatients = useMemo(() => {
     const normalized = search.trim().toLowerCase()
@@ -52,10 +53,9 @@ function ClinicalModuleLayout({
     )
   }, [patients, search])
 
-  return (
-    <div className="h-full flex">
-      <aside className="w-80 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-5 border-b border-gray-100 space-y-3">
+  const patientsPanel = (
+    <div className="flex h-full flex-col">
+      <div className="space-y-3 border-b border-gray-100 p-5">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             <p className="text-sm text-gray-500 mt-1">{description}</p>
@@ -69,7 +69,7 @@ function ClinicalModuleLayout({
           />
         </div>
 
-        <div className="p-4 border-b border-gray-100">
+        <div className="border-b border-gray-100 p-4">
           <Link
             to="/patients"
             className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
@@ -119,9 +119,38 @@ function ClinicalModuleLayout({
             </div>
           )}
         </div>
+    </div>
+  )
+
+  return (
+    <div className="flex h-full flex-col lg:flex-row">
+      <aside className="hidden w-80 shrink-0 border-r border-gray-200 bg-white lg:flex lg:flex-col">
+        {patientsPanel}
       </aside>
 
-      <main className="flex-1 overflow-auto p-6">
+      <div className="border-b border-gray-200 bg-white p-4 lg:hidden">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+            <p className="mt-1 text-sm text-gray-500">{description}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowPatients((current) => !current)}
+            className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          >
+            {showPatients ? "Ocultar pacientes" : selectedPatient ? `Paciente: ${selectedPatient.name}` : "Seleccionar paciente"}
+          </button>
+        </div>
+
+        {showPatients && (
+          <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50/70">
+            {patientsPanel}
+          </div>
+        )}
+      </div>
+
+      <main className="flex-1 overflow-auto p-4 sm:p-6">
         {!selectedPatient ? (
           <div className="bg-white rounded-xl shadow-sm p-10 text-center">
             <p className="text-gray-500">Selecciona un paciente para trabajar en este modulo.</p>

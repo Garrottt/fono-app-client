@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
+import { getAnamnesisService } from "../services/anamnesis.service"
 import {
   downloadPreLavadoPdfService,
   getPreLavadoService,
   savePreLavadoService
 } from "../services/prelavado.service"
+import type { Anamnesis } from "../types/anamnesis.types"
 import type {
   CaeObservation,
   MembranaObservation,
@@ -142,36 +144,50 @@ const computeLiveResult = (form: UpdatePreLavadoInput) => {
   }
 }
 
-function BooleanToggle({
+function BinaryField({
   label,
   value,
-  onChange
+  onChange,
+  help
 }: {
   label: string
   value: boolean
   onChange: (value: boolean) => void
+  help?: string
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-medium text-gray-800">{label}</p>
-        <div className="flex rounded-md border border-gray-200 overflow-hidden">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-slate-800">{label}</p>
+          {help && <p className="mt-1 text-xs leading-relaxed text-slate-500">{help}</p>}
+        </div>
+        <div className="flex shrink-0 rounded-full border border-slate-200 bg-slate-100 p-1">
           <button
             type="button"
             onClick={() => onChange(true)}
-            className={`px-3 py-1.5 text-sm ${value ? "bg-indigo-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+            className={`min-w-[58px] rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${value ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-white"}`}
           >
             Si
           </button>
           <button
             type="button"
             onClick={() => onChange(false)}
-            className={`px-3 py-1.5 text-sm ${!value ? "bg-indigo-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+            className={`min-w-[58px] rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${!value ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-white"}`}
           >
             No
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ReadOnlyCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-2 text-sm font-medium text-slate-800">{value}</p>
     </div>
   )
 }
@@ -189,7 +205,7 @@ function SelectField<T extends string>({
     <select
       value={value}
       onChange={(event) => onChange(event.target.value as T)}
-      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
     >
       {options.map((option) => (
         <option key={option.value} value={option.value}>
@@ -200,8 +216,41 @@ function SelectField<T extends string>({
   )
 }
 
+function EarField({
+  title,
+  estado,
+  observacion,
+  statusOptions,
+  observationOptions,
+  onEstadoChange,
+  onObservacionChange
+}: {
+  title: string
+  estado: StructureStatus
+  observacion: string
+  statusOptions: Array<{ value: StructureStatus; label: string }>
+  observationOptions: Array<{ value: string; label: string }>
+  onEstadoChange: (value: StructureStatus) => void
+  onObservacionChange: (value: string) => void
+}) {
+  return (
+    <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-sm font-semibold text-slate-800">{title}</p>
+      <div className="space-y-1">
+        <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">Estado</label>
+        <SelectField value={estado} options={statusOptions} onChange={onEstadoChange} />
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">Observacion</label>
+        <SelectField value={observacion} options={observationOptions} onChange={onObservacionChange} />
+      </div>
+    </div>
+  )
+}
+
 function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis }: Props) {
   const [evaluation, setEvaluation] = useState<PreLavadoEvaluation | null>(null)
+  const [anamnesis, setAnamnesis] = useState<Anamnesis | null>(null)
   const [form, setForm] = useState<UpdatePreLavadoInput>(EMPTY_FORM)
   const [savedForm, setSavedForm] = useState<UpdatePreLavadoInput>(EMPTY_FORM)
   const [loading, setLoading] = useState(true)
@@ -213,6 +262,9 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
   useEffect(() => {
     const fetchEvaluation = async () => {
       try {
+        const anamnesisData = await getAnamnesisService(patientId)
+        setAnamnesis(anamnesisData)
+
         const data = await getPreLavadoService(patientId)
         if (data) {
           const nextForm = {
@@ -245,6 +297,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
             odObservaciones: data.odObservaciones || "",
             oiObservaciones: data.oiObservaciones || ""
           }
+
           setEvaluation(data)
           setForm(nextForm)
           setSavedForm(nextForm)
@@ -253,7 +306,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
           setForm(EMPTY_FORM)
           setSavedForm(EMPTY_FORM)
         }
-      } catch (fetchError) {
+      } catch {
         setError("Error al cargar la evaluacion pre-lavado")
       } finally {
         setLoading(false)
@@ -263,11 +316,69 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
     fetchEvaluation()
   }, [patientId])
 
-  const derived = useMemo(() => computeLiveResult(form), [form])
+  const inheritedContext = useMemo(() => ({
+    hasDiabetesOrImmunosuppression: Boolean(anamnesis?.hasDiabetesOrImmunosuppression),
+    hasPreviousEarSurgeries: Boolean(anamnesis?.hasPreviousEarSurgeries),
+    otalgia: Boolean(anamnesis?.otalgia),
+    hipoacusia: Boolean(anamnesis?.hipoacusia),
+    plenitudOtica: Boolean(anamnesis?.plenitudOtica),
+    otorrea: Boolean(anamnesis?.otorrea),
+    prurito: Boolean(anamnesis?.prurito),
+    otorragia: Boolean(anamnesis?.otorragia),
+    usesHearingAid: Boolean(anamnesis?.usesHearingAid),
+    hearingAidBadSmell: Boolean(anamnesis?.hearingAidSuppurationOrBadSmell)
+  }), [anamnesis])
+  const mergedForm = useMemo(
+    () => ({
+      ...form,
+      ...inheritedContext
+    }),
+    [form, inheritedContext]
+  )
+  const derived = useMemo(() => computeLiveResult(mergedForm), [mergedForm])
+  const anamnesisAlerts = useMemo(() => {
+    if (!anamnesis) return []
+
+    const alerts: string[] = []
+
+    if (anamnesis.hasPreviousEarSurgeries) {
+      const surgeries = [
+        anamnesis.timpanoplastia ? "timpanoplastia" : null,
+        anamnesis.mastoidectomia ? "mastoidectomia" : null,
+        anamnesis.miringoplastia ? "miringoplastia" : null,
+        anamnesis.osiculoplastia ? "osiculoplastia" : null,
+        anamnesis.estapedectomiaEstapedotomia ? "estapedectomia / estapedotomia" : null
+      ].filter(Boolean)
+
+      alerts.push(
+        surgeries.length > 0
+          ? `Advertencia desde anamnesis: cirugias de oido previas registradas (${surgeries.join(", ")}).`
+          : "Advertencia desde anamnesis: se registraron cirugias de oido previas."
+      )
+    }
+
+    if (anamnesis.hasDiabetesOrImmunosuppression) {
+      alerts.push("Advertencia desde anamnesis: antecedente de diabetes o inmunosupresion.")
+    }
+
+    if (anamnesis.otorrea) {
+      alerts.push("Advertencia desde anamnesis: se registro otorrea en la anamnesis.")
+    }
+
+    if (anamnesis.otorragia) {
+      alerts.push("Advertencia desde anamnesis: se registro otorragia en la anamnesis.")
+    }
+
+    return alerts
+  }, [anamnesis])
   const hasUnsavedChanges = useMemo(
     () => JSON.stringify(form) !== JSON.stringify(savedForm),
     [form, savedForm]
   )
+
+  const statusClass = derived.aptoParaLavado
+    ? "border-green-200 bg-green-50 text-green-700"
+    : "border-red-200 bg-red-50 text-red-700"
 
   const updateField = <K extends keyof UpdatePreLavadoInput>(key: K, value: UpdatePreLavadoInput[K]) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -279,7 +390,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
     setMessage("")
 
     try {
-      const response = await savePreLavadoService(patientId, form)
+      const response = await savePreLavadoService(patientId, mergedForm)
       setEvaluation(response.evaluation)
       setSavedForm(form)
       setMessage(response.message)
@@ -323,61 +434,64 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
   }
 
   if (loading) {
-    return <p className="text-sm text-gray-400">Cargando evaluacion pre-lavado...</p>
+    return <p className="text-sm text-slate-400">Cargando evaluacion pre-lavado...</p>
   }
 
   return (
     <div className="space-y-6">
-      <div className="sticky top-[73px] z-20 bg-gray-100/95 backdrop-blur pb-2">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-3">
-            <div>
-              <h3 className="text-lg font-medium text-gray-800">Evaluacion Pre-Lavado</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                Registro tecnico para soporte clinico durante la consulta.
-              </p>
-            </div>
+      <div className="sticky top-[73px] z-20 bg-gray-100/95 pb-3 backdrop-blur">
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-400">Pre-Lavado</p>
+                <h3 className="mt-2 text-2xl font-semibold text-slate-900">{patientName}</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Evaluacion otoscopica pre-lavado para soporte clinico durante la consulta.
+                </p>
+              </div>
 
-            <div className="flex flex-wrap gap-2">
-              <span className={`rounded-full border px-3 py-1 text-xs font-medium ${derived.aptoParaLavado ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"}`}>
-                {derived.aptoParaLavado ? "Apto para lavado" : "No apto para lavado"}
-              </span>
-              {derived.precautionAlerts.length > 0 && (
-                <span className="rounded-full border border-amber-200 bg-amber-50 text-amber-900 px-3 py-1 text-xs font-medium">
-                  Con alertas
+              <div className="flex flex-wrap gap-2">
+                <span className={`rounded-full border px-3 py-1 text-xs font-medium ${statusClass}`}>
+                  {derived.aptoParaLavado ? "Apto para lavado" : "No apto para lavado"}
                 </span>
-              )}
-              <span className={`rounded-full border px-3 py-1 text-xs font-medium ${hasUnsavedChanges ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-200 bg-gray-100 text-gray-500"}`}>
-                {hasUnsavedChanges ? "Cambios sin guardar" : "Guardado"}
-              </span>
+                {derived.precautionAlerts.length > 0 && (
+                  <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
+                    Con alertas
+                  </span>
+                )}
+                <span className={`rounded-full border px-3 py-1 text-xs font-medium ${hasUnsavedChanges ? "border-blue-200 bg-blue-50 text-blue-700" : "border-slate-200 bg-slate-100 text-slate-500"}`}>
+                  {hasUnsavedChanges ? "Cambios sin guardar" : "Guardado"}
+                </span>
+              </div>
             </div>
 
-            <div className="grid gap-1 text-xs text-gray-500">
-              <p>Paciente: <span className="font-medium text-gray-700">{patientName}</span></p>
-              <p>Edad: <span className="font-medium text-gray-700">{patientAge ?? "No registrada"}</span></p>
-              <p>Diagnostico: <span className="font-medium text-gray-700">{patientDiagnosis || "Sin diagnostico"}</span></p>
-              <p>Ultima actualizacion: <span className="font-medium text-gray-700">{formatUpdatedAt(evaluation?.updatedAt)}</span></p>
-              <p>Hipotesis: <span className="font-medium text-gray-700">{derived.diagnosticSummary}</span></p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={downloading || !evaluation}
+                className="rounded-xl border border-indigo-200 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-50 disabled:opacity-50"
+              >
+                {downloading ? "Generando PDF..." : "Generar ficha PDF"}
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {saving ? "Guardando..." : "Guardar evaluacion"}
+              </button>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={downloading || !evaluation}
-              className="border border-indigo-200 text-indigo-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors disabled:opacity-50"
-            >
-              {downloading ? "Generando PDF..." : "Generar Ficha de Evaluacion"}
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
-            >
-              {saving ? "Guardando..." : "Guardar evaluacion"}
-            </button>
+          <div className="grid gap-3 px-5 py-4 md:grid-cols-2 xl:grid-cols-5">
+            <ReadOnlyCard label="Paciente" value={patientName} />
+            <ReadOnlyCard label="Edad" value={patientAge?.toString() || "No registrada"} />
+            <ReadOnlyCard label="Diagnostico" value={patientDiagnosis || "Sin diagnostico"} />
+            <ReadOnlyCard label="Hipotesis" value={derived.diagnosticSummary} />
+            <ReadOnlyCard label="Ultima actualizacion" value={formatUpdatedAt(evaluation?.updatedAt)} />
           </div>
         </div>
       </div>
@@ -385,158 +499,252 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
       {error && <p className="text-sm text-red-500">{error}</p>}
       {message && <p className="text-sm text-green-600">{message}</p>}
 
-      <div className="bg-white rounded-lg shadow-sm p-6 space-y-8">
-        <section className="space-y-4">
+      {anamnesisAlerts.length > 0 && (
+        <div className="space-y-2">
+          {anamnesisAlerts.map((alert) => (
+            <div key={alert} className="rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900 shadow-sm">
+              {alert}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {derived.criticalBlocks.length > 0 && (
+        <div className="space-y-2">
+          {derived.criticalBlocks.map((block) => (
+            <div key={block} className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm">
+              {block}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {derived.precautionAlerts.length > 0 && (
+        <div className="space-y-2">
+          {derived.precautionAlerts.map((alert) => (
+            <div key={alert} className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm">
+              {alert}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="space-y-6">
+        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
-            <h4 className="text-base font-medium text-gray-800">Antecedentes y sintomas clave</h4>
-            <p className="text-sm text-gray-500 mt-1">Estos datos activan alertas, bloqueos y la hipotesis automatica.</p>
+            <h4 className="text-lg font-semibold text-slate-900">Contexto heredado desde anamnesis</h4>
+            <p className="mt-1 text-sm text-slate-500">Estos antecedentes ya vienen desde la anamnesis y se consideran automaticamente en el cierre clinico.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <BooleanToggle label="Diabetes o inmunosupresion" value={form.hasDiabetesOrImmunosuppression} onChange={(value) => updateField("hasDiabetesOrImmunosuppression", value)} />
-            <BooleanToggle label="Cirugias previas" value={form.hasPreviousEarSurgeries} onChange={(value) => updateField("hasPreviousEarSurgeries", value)} />
-            <BooleanToggle label="Perforacion timpanica conocida" value={form.hasKnownPerforation} onChange={(value) => updateField("hasKnownPerforation", value)} />
-            <BooleanToggle label="Otalgia" value={form.otalgia} onChange={(value) => updateField("otalgia", value)} />
-            <BooleanToggle label="Hipoacusia" value={form.hipoacusia} onChange={(value) => updateField("hipoacusia", value)} />
-            <BooleanToggle label="Plenitud otica" value={form.plenitudOtica} onChange={(value) => updateField("plenitudOtica", value)} />
-            <BooleanToggle label="Otorrea" value={form.otorrea} onChange={(value) => updateField("otorrea", value)} />
-            <BooleanToggle label="Prurito" value={form.prurito} onChange={(value) => updateField("prurito", value)} />
-            <BooleanToggle label="Otorragia" value={form.otorragia} onChange={(value) => updateField("otorragia", value)} />
-            <BooleanToggle label="Dolor al tocar trago" value={form.dolorAlTocarTrago} onChange={(value) => updateField("dolorAlTocarTrago", value)} />
-            <BooleanToggle label="Uso de audifonos" value={form.usesHearingAid} onChange={(value) => updateField("usesHearingAid", value)} />
-            {form.usesHearingAid ? (
-              <BooleanToggle label="Mal olor con audifonos" value={form.hearingAidBadSmell} onChange={(value) => updateField("hearingAidBadSmell", value)} />
-            ) : (
-              <div className="rounded-lg border border-dashed border-gray-200 p-4 text-sm text-gray-400">
-                Al marcar uso de audifonos se habilitan subpreguntas relacionadas.
-              </div>
-            )}
+          {!anamnesis && (
+            <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              Este paciente aun no tiene anamnesis registrada. El pre-lavado seguira funcionando, pero sin antecedentes clinicos heredados.
+            </div>
+          )}
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <ReadOnlyCard label="Diabetes / inmunosupresion" value={inheritedContext.hasDiabetesOrImmunosuppression ? "Si" : "No"} />
+            <ReadOnlyCard label="Cirugias previas" value={inheritedContext.hasPreviousEarSurgeries ? "Si" : "No"} />
+            <ReadOnlyCard label="Uso de audifonos" value={inheritedContext.usesHearingAid ? "Si" : "No"} />
+            <ReadOnlyCard label="Otalgia" value={inheritedContext.otalgia ? "Si" : "No"} />
+            <ReadOnlyCard label="Hipoacusia" value={inheritedContext.hipoacusia ? "Si" : "No"} />
+            <ReadOnlyCard label="Plenitud otica" value={inheritedContext.plenitudOtica ? "Si" : "No"} />
+            <ReadOnlyCard label="Otorrea" value={inheritedContext.otorrea ? "Si" : "No"} />
+            <ReadOnlyCard label="Prurito" value={inheritedContext.prurito ? "Si" : "No"} />
+            <ReadOnlyCard label="Otorragia" value={inheritedContext.otorragia ? "Si" : "No"} />
+            <ReadOnlyCard label="Mal olor con audifonos" value={inheritedContext.hearingAidBadSmell ? "Si" : "No"} />
           </div>
         </section>
 
-        <section className="space-y-4">
+        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
-            <h4 className="text-base font-medium text-gray-800">IV. Evaluacion otoscopica pre-lavado</h4>
-            <p className="text-sm text-gray-500 mt-1">Registro comparativo por oido derecho y oido izquierdo.</p>
+            <h4 className="text-lg font-semibold text-slate-900">Variables propias del pre-lavado</h4>
+            <p className="mt-1 text-sm text-slate-500">Aqui solo se registran hallazgos exclusivos de esta evaluacion.</p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-sm">
-              <thead>
-                <tr className="text-left text-gray-500 border-b border-gray-200">
-                  <th className="py-2 pr-4 font-medium">Estructura</th>
-                  <th className="py-2 pr-4 font-medium">OD</th>
-                  <th className="py-2 pr-4 font-medium">OI</th>
-                  <th className="py-2 pr-4 font-medium">Observacion OD</th>
-                  <th className="py-2 font-medium">Observacion OI</th>
-                </tr>
-              </thead>
-              <tbody className="align-top">
-                <tr className="border-b border-gray-100">
-                  <td className="py-3 pr-4 font-medium text-gray-700">Pabellon auricular</td>
-                  <td className="py-3 pr-4"><SelectField value={form.odPabellonEstado} options={STATUS_OPTIONS} onChange={(value) => updateField("odPabellonEstado", value)} /></td>
-                  <td className="py-3 pr-4"><SelectField value={form.oiPabellonEstado} options={STATUS_OPTIONS} onChange={(value) => updateField("oiPabellonEstado", value)} /></td>
-                  <td className="py-3 pr-4"><SelectField value={form.odPabellonObservacion} options={PABELLON_OPTIONS} onChange={(value) => updateField("odPabellonObservacion", value)} /></td>
-                  <td className="py-3"><SelectField value={form.oiPabellonObservacion} options={PABELLON_OPTIONS} onChange={(value) => updateField("oiPabellonObservacion", value)} /></td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="py-3 pr-4 font-medium text-gray-700">CAE</td>
-                  <td className="py-3 pr-4"><SelectField value={form.odCaeEstado} options={STATUS_OPTIONS} onChange={(value) => updateField("odCaeEstado", value)} /></td>
-                  <td className="py-3 pr-4"><SelectField value={form.oiCaeEstado} options={STATUS_OPTIONS} onChange={(value) => updateField("oiCaeEstado", value)} /></td>
-                  <td className="py-3 pr-4"><SelectField value={form.odCaeObservacion} options={CAE_OPTIONS} onChange={(value) => updateField("odCaeObservacion", value)} /></td>
-                  <td className="py-3"><SelectField value={form.oiCaeObservacion} options={CAE_OPTIONS} onChange={(value) => updateField("oiCaeObservacion", value)} /></td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="py-3 pr-4 font-medium text-gray-700">Membrana</td>
-                  <td className="py-3 pr-4"><SelectField value={form.odMembranaEstado} options={STATUS_OPTIONS} onChange={(value) => updateField("odMembranaEstado", value)} /></td>
-                  <td className="py-3 pr-4"><SelectField value={form.oiMembranaEstado} options={STATUS_OPTIONS} onChange={(value) => updateField("oiMembranaEstado", value)} /></td>
-                  <td className="py-3 pr-4"><SelectField value={form.odMembranaObservacion} options={MEMBRANA_OPTIONS} onChange={(value) => updateField("odMembranaObservacion", value)} /></td>
-                  <td className="py-3"><SelectField value={form.oiMembranaObservacion} options={MEMBRANA_OPTIONS} onChange={(value) => updateField("oiMembranaObservacion", value)} /></td>
-                </tr>
-                <tr className="border-b border-gray-100">
-                  <td className="py-3 pr-4 font-medium text-gray-700">Escala de Sullivan</td>
-                  <td className="py-3 pr-4">
-                    <select value={form.odSullivan} onChange={(event) => updateField("odSullivan", event.target.value as SullivanScale)} className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full">
-                      {SULLIVAN_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-                    </select>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <select value={form.oiSullivan} onChange={(event) => updateField("oiSullivan", event.target.value as SullivanScale)} className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full">
-                      {SULLIVAN_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-                    </select>
-                  </td>
-                  <td className="py-3 pr-4 text-gray-400">-</td>
-                  <td className="py-3 text-gray-400">-</td>
-                </tr>
-                <tr>
-                  <td className="py-3 pr-4 font-medium text-gray-700">Observaciones libres</td>
-                  <td colSpan={2} className="py-3 pr-4">
-                    <textarea
-                      value={form.odObservaciones || ""}
-                      onChange={(event) => updateField("odObservaciones", event.target.value)}
-                      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none w-full"
-                      rows={3}
-                      placeholder="Observaciones OD"
-                    />
-                  </td>
-                  <td colSpan={2} className="py-3">
-                    <textarea
-                      value={form.oiObservaciones || ""}
-                      onChange={(event) => updateField("oiObservaciones", event.target.value)}
-                      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none w-full"
-                      rows={3}
-                      placeholder="Observaciones OI"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="grid gap-4">
+            <BinaryField
+              label="Perforacion timpanica conocida"
+              value={form.hasKnownPerforation}
+              onChange={(value) => updateField("hasKnownPerforation", value)}
+            />
+            <BinaryField
+              label="Dolor al tocar trago"
+              value={form.dolorAlTocarTrago}
+              onChange={(value) => updateField("dolorAlTocarTrago", value)}
+            />
           </div>
         </section>
 
-        <section className="space-y-4">
+        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
-            <h4 className="text-base font-medium text-gray-800">Cierre clinico</h4>
-            <p className="text-sm text-gray-500 mt-1">Resumen automatico segun los datos cargados.</p>
+            <h4 className="text-lg font-semibold text-slate-900">Cierre clinico</h4>
+            <p className="mt-1 text-sm text-slate-500">Resumen automatico segun los datos cargados durante la evaluacion.</p>
           </div>
 
-          <div className={`rounded-xl border px-4 py-3 text-sm font-medium ${derived.aptoParaLavado ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"}`}>
+          <div className={`rounded-2xl border px-4 py-4 text-sm font-semibold ${statusClass}`}>
             {derived.aptoParaLavado ? "Apto para lavado" : "No apto para lavado"}
           </div>
 
-          {derived.criticalBlocks.length > 0 && (
-            <div className="space-y-2">
-              {derived.criticalBlocks.map((block) => (
-                <div key={block} className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-                  {block}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {derived.precautionAlerts.length > 0 && (
-            <div className="space-y-2">
-              {derived.precautionAlerts.map((alert) => (
-                <div key={alert} className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                  {alert}
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="rounded-lg border border-gray-200 p-4">
-              <p className="text-xs text-gray-400 mb-1">Hipotesis diagnostica sugerida</p>
-              <p className="text-sm text-gray-800">{derived.diagnosticSummary}</p>
-            </div>
-            <div className="rounded-lg border border-gray-200 p-4">
-              <p className="text-xs text-gray-400 mb-1">Conducta sugerida</p>
-              <p className="text-sm text-gray-800">{derived.suggestedConduct}</p>
-            </div>
+          <div className="grid gap-4">
+            <ReadOnlyCard label="Hipotesis diagnostica sugerida" value={derived.diagnosticSummary} />
+            <ReadOnlyCard label="Conducta sugerida" value={derived.suggestedConduct} />
           </div>
         </section>
-
       </div>
+
+      <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div>
+          <h4 className="text-lg font-semibold text-slate-900">IV. Evaluacion otoscopica pre-lavado</h4>
+          <p className="mt-1 text-sm text-slate-500">Comparacion estructurada entre oido derecho y oido izquierdo.</p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="overflow-x-auto rounded-3xl border border-slate-200">
+            <div className="min-w-[920px] bg-slate-50">
+              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700">
+                <div className="border-r border-slate-200 px-4 py-3">Estructura</div>
+                <div className="border-r border-slate-200 px-4 py-3">OD</div>
+                <div className="px-4 py-3">OI</div>
+              </div>
+
+              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200">
+                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">Pabellon auricular</div>
+                <div className="border-r border-slate-200 px-4 py-4">
+                  <EarField
+                    title="OD"
+                    estado={form.odPabellonEstado}
+                    observacion={form.odPabellonObservacion}
+                    statusOptions={STATUS_OPTIONS}
+                    observationOptions={PABELLON_OPTIONS}
+                    onEstadoChange={(value) => updateField("odPabellonEstado", value)}
+                    onObservacionChange={(value) => updateField("odPabellonObservacion", value as PabellonObservation)}
+                  />
+                </div>
+                <div className="px-4 py-4">
+                  <EarField
+                    title="OI"
+                    estado={form.oiPabellonEstado}
+                    observacion={form.oiPabellonObservacion}
+                    statusOptions={STATUS_OPTIONS}
+                    observationOptions={PABELLON_OPTIONS}
+                    onEstadoChange={(value) => updateField("oiPabellonEstado", value)}
+                    onObservacionChange={(value) => updateField("oiPabellonObservacion", value as PabellonObservation)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200">
+                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">CAE</div>
+                <div className="border-r border-slate-200 px-4 py-4">
+                  <EarField
+                    title="OD"
+                    estado={form.odCaeEstado}
+                    observacion={form.odCaeObservacion}
+                    statusOptions={STATUS_OPTIONS}
+                    observationOptions={CAE_OPTIONS}
+                    onEstadoChange={(value) => updateField("odCaeEstado", value)}
+                    onObservacionChange={(value) => updateField("odCaeObservacion", value as CaeObservation)}
+                  />
+                </div>
+                <div className="px-4 py-4">
+                  <EarField
+                    title="OI"
+                    estado={form.oiCaeEstado}
+                    observacion={form.oiCaeObservacion}
+                    statusOptions={STATUS_OPTIONS}
+                    observationOptions={CAE_OPTIONS}
+                    onEstadoChange={(value) => updateField("oiCaeEstado", value)}
+                    onObservacionChange={(value) => updateField("oiCaeObservacion", value as CaeObservation)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200">
+                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">Membrana</div>
+                <div className="border-r border-slate-200 px-4 py-4">
+                  <EarField
+                    title="OD"
+                    estado={form.odMembranaEstado}
+                    observacion={form.odMembranaObservacion}
+                    statusOptions={STATUS_OPTIONS}
+                    observationOptions={MEMBRANA_OPTIONS}
+                    onEstadoChange={(value) => updateField("odMembranaEstado", value)}
+                    onObservacionChange={(value) => updateField("odMembranaObservacion", value as MembranaObservation)}
+                  />
+                </div>
+                <div className="px-4 py-4">
+                  <EarField
+                    title="OI"
+                    estado={form.oiMembranaEstado}
+                    observacion={form.oiMembranaObservacion}
+                    statusOptions={STATUS_OPTIONS}
+                    observationOptions={MEMBRANA_OPTIONS}
+                    onEstadoChange={(value) => updateField("oiMembranaEstado", value)}
+                    onObservacionChange={(value) => updateField("oiMembranaObservacion", value as MembranaObservation)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200">
+                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">Escala de Sullivan</div>
+                <div className="border-r border-slate-200 px-4 py-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="mb-3 text-sm font-semibold text-slate-800">OD</p>
+                    <select
+                      value={form.odSullivan}
+                      onChange={(event) => updateField("odSullivan", event.target.value as SullivanScale)}
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      {SULLIVAN_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="px-4 py-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="mb-3 text-sm font-semibold text-slate-800">OI</p>
+                    <select
+                      value={form.oiSullivan}
+                      onChange={(event) => updateField("oiSullivan", event.target.value as SullivanScale)}
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      {SULLIVAN_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[180px_1fr_1fr]">
+                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">Observaciones libres</div>
+                <div className="border-r border-slate-200 px-4 py-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="mb-3 text-sm font-semibold text-slate-800">OD</p>
+                    <textarea
+                      value={form.odObservaciones || ""}
+                      onChange={(event) => updateField("odObservaciones", event.target.value)}
+                      rows={4}
+                      placeholder="Observaciones OD"
+                      className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="px-4 py-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="mb-3 text-sm font-semibold text-slate-800">OI</p>
+                    <textarea
+                      value={form.oiObservaciones || ""}
+                      onChange={(event) => updateField("oiObservaciones", event.target.value)}
+                      rows={4}
+                      placeholder="Observaciones OI"
+                      className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
