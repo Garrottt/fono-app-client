@@ -67,6 +67,7 @@ export interface SessionTaskInput {
   title: string
   description?: string
   order: number
+  files?: FileRecord[]
 }
 
 export interface SessionPlanInput {

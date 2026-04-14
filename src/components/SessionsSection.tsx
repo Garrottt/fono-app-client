@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import type { Dispatch, FormEvent, SetStateAction } from "react"
+import type { FormEvent } from "react"
 import {
   createSessionService,
   deleteSessionTaskFileService,
@@ -22,6 +22,8 @@ interface SessionsSectionProps {
 }
 
 interface SessionFormState extends CreateSessionInput {}
+
+type SessionFormUpdater = (updater: (current: SessionFormState) => SessionFormState) => void
 
 const createOperationalObjective = (description = "") => ({
   description,
@@ -214,6 +216,14 @@ function SessionsSection({ patientId, sessions, onSessionsChange, onError }: Ses
     [sessions]
   )
 
+  const updateCreateForm: SessionFormUpdater = (updater) => {
+    setCreateForm((current) => updater(current))
+  }
+
+  const updateEditForm: SessionFormUpdater = (updater) => {
+    setEditForm((current) => current ? updater(current) : current)
+  }
+
   const resetCreateForm = () => {
     setCreateForm(createEmptySessionForm())
     setShowCreateForm(false)
@@ -371,7 +381,7 @@ function SessionsSection({ patientId, sessions, onSessionsChange, onError }: Ses
 
 const renderSessionForm = (
   form: SessionFormState,
-  setForm: Dispatch<SetStateAction<SessionFormState>>,
+  setForm: SessionFormUpdater,
   actionLabel: string,
   submitDisabled: boolean,
   submitMode: "submit" | "button",
@@ -814,7 +824,7 @@ const renderSessionForm = (
             <p className="text-xs uppercase tracking-[0.3em] text-indigo-400">Nueva sesion</p>
             <h4 className="mt-1 text-lg font-semibold text-slate-800">Planificacion de sesion</h4>
           </div>
-          {renderSessionForm(createForm, setCreateForm, "Guardar sesion", saving, "submit")}
+          {renderSessionForm(createForm, updateCreateForm, "Guardar sesion", saving, "submit")}
         </form>
       )}
 
@@ -897,7 +907,7 @@ const renderSessionForm = (
                       <div className="space-y-4">
                         {renderSessionForm(
                           editForm,
-                          setEditForm,
+                          updateEditForm,
                           "Guardar cambios",
                           saving,
                           "button",
