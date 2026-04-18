@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { Link, useSearchParams } from "react-router-dom"
+﻿import { useEffect, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import ClinicalModuleLayout from "../components/ClinicalModuleLayout"
 import PreLavadoSection from "../components/PreLavadoSection"
 import { getPatientsService } from "../services/patient.service"
@@ -23,14 +23,14 @@ function PreLavadoPage() {
         if (!selectedPatientId && data.length > 0) {
           setSearchParams({ patientId: data[0].id }, { replace: true })
         }
-      } catch (fetchError) {
+      } catch {
         setError("Error al cargar los pacientes")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchPatients()
+    void fetchPatients()
   }, [selectedPatientId, setSearchParams])
 
   const getPatientStatus = (patient: Patient) => {
@@ -52,7 +52,7 @@ function PreLavadoPage() {
   return (
     <ClinicalModuleLayout
       title="Pre-Lavado"
-      description="Selecciona un paciente para registrar su evaluacion otoscopica."
+      description="Selecciona un paciente para evaluar aptitud, bloqueos y observaciones otoscópicas antes del procedimiento."
       patients={patients}
       loading={loading}
       error={error}
@@ -62,22 +62,36 @@ function PreLavadoPage() {
       getPatientStatus={getPatientStatus}
     >
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-800">{selectedPatient?.name}</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Modulo de evaluacion pre-lavado para soporte clinico otico.
-            </p>
+        <section className="rounded-[1.8rem] border border-white/70 bg-gradient-to-br from-slate-950 via-slate-900 to-amber-700 px-5 py-6 text-white shadow-[0_22px_46px_rgba(15,23,42,0.18)] sm:px-6">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(220px,0.8fr)] lg:items-end">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">Filtro clínico</p>
+              <h2 className="fono-title mt-3 text-3xl font-semibold">Evaluación previa con decisiones visibles</h2>
+              <p className="mt-3 text-sm leading-7 text-white/72">
+                Reorganicé este módulo para que los bloqueos y precauciones se perciban antes de empezar a editar el detalle, algo clave para una experiencia más intuitiva.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+                <p className="text-xs uppercase tracking-[0.18em] text-white/55">Aptitud</p>
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {selectedPatient?.preLavadoEvaluation
+                    ? selectedPatient.preLavadoEvaluation.aptoParaLavado
+                      ? "Apto para lavado"
+                      : "No apto"
+                    : "Pendiente"}
+                </p>
+              </div>
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+                <p className="text-xs uppercase tracking-[0.18em] text-white/55">Precauciones</p>
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {selectedPatient?.preLavadoEvaluation?.precautionAlerts.length || 0}
+                </p>
+              </div>
+            </div>
           </div>
-          {selectedPatient && (
-            <Link
-              to={`/patients/${selectedPatient.id}`}
-              className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
-              Ver ficha completa
-            </Link>
-          )}
-        </div>
+        </section>
 
         {selectedPatient && (
           <PreLavadoSection
@@ -93,3 +107,4 @@ function PreLavadoPage() {
 }
 
 export default PreLavadoPage
+
