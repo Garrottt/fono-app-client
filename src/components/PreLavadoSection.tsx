@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import type { ReactNode } from "react"
 import { getAnamnesisService } from "../services/anamnesis.service"
 import {
   downloadPreLavadoPdfService,
@@ -243,6 +244,32 @@ function EarField({
       <div className="space-y-1">
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">Observacion</label>
         <SelectField value={observacion} options={observationOptions} onChange={onObservacionChange} />
+      </div>
+    </div>
+  )
+}
+
+function OtoscopicComparisonCard({
+  label,
+  odContent,
+  oiContent
+}: {
+  label: string
+  odContent: ReactNode
+  oiContent: ReactNode
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+      <p className="text-sm font-semibold text-slate-800">{label}</p>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">OD</p>
+          {odContent}
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">OI</p>
+          {oiContent}
+        </div>
       </div>
     </div>
   )
@@ -599,150 +626,136 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
           <p className="mt-1 text-sm text-slate-500">Comparacion estructurada entre oido derecho y oido izquierdo.</p>
         </div>
 
-        <div className="space-y-6">
-          <div className="overflow-x-auto rounded-3xl border border-slate-200">
-            <div className="min-w-[920px] bg-slate-50">
-              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700">
-                <div className="border-r border-slate-200 px-4 py-3">Estructura</div>
-                <div className="border-r border-slate-200 px-4 py-3">OD</div>
-                <div className="px-4 py-3">OI</div>
-              </div>
+        <div className="space-y-4">
+          <OtoscopicComparisonCard
+            label="Pabellon auricular"
+            odContent={
+              <EarField
+                title="OD"
+                estado={form.odPabellonEstado}
+                observacion={form.odPabellonObservacion}
+                statusOptions={STATUS_OPTIONS}
+                observationOptions={PABELLON_OPTIONS}
+                onEstadoChange={(value) => updateField("odPabellonEstado", value)}
+                onObservacionChange={(value) => updateField("odPabellonObservacion", value as PabellonObservation)}
+              />
+            }
+            oiContent={
+              <EarField
+                title="OI"
+                estado={form.oiPabellonEstado}
+                observacion={form.oiPabellonObservacion}
+                statusOptions={STATUS_OPTIONS}
+                observationOptions={PABELLON_OPTIONS}
+                onEstadoChange={(value) => updateField("oiPabellonEstado", value)}
+                onObservacionChange={(value) => updateField("oiPabellonObservacion", value as PabellonObservation)}
+              />
+            }
+          />
 
-              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200">
-                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">Pabellon auricular</div>
-                <div className="border-r border-slate-200 px-4 py-4">
-                  <EarField
-                    title="OD"
-                    estado={form.odPabellonEstado}
-                    observacion={form.odPabellonObservacion}
-                    statusOptions={STATUS_OPTIONS}
-                    observationOptions={PABELLON_OPTIONS}
-                    onEstadoChange={(value) => updateField("odPabellonEstado", value)}
-                    onObservacionChange={(value) => updateField("odPabellonObservacion", value as PabellonObservation)}
-                  />
-                </div>
-                <div className="px-4 py-4">
-                  <EarField
-                    title="OI"
-                    estado={form.oiPabellonEstado}
-                    observacion={form.oiPabellonObservacion}
-                    statusOptions={STATUS_OPTIONS}
-                    observationOptions={PABELLON_OPTIONS}
-                    onEstadoChange={(value) => updateField("oiPabellonEstado", value)}
-                    onObservacionChange={(value) => updateField("oiPabellonObservacion", value as PabellonObservation)}
-                  />
-                </div>
-              </div>
+          <OtoscopicComparisonCard
+            label="CAE"
+            odContent={
+              <EarField
+                title="OD"
+                estado={form.odCaeEstado}
+                observacion={form.odCaeObservacion}
+                statusOptions={STATUS_OPTIONS}
+                observationOptions={CAE_OPTIONS}
+                onEstadoChange={(value) => updateField("odCaeEstado", value)}
+                onObservacionChange={(value) => updateField("odCaeObservacion", value as CaeObservation)}
+              />
+            }
+            oiContent={
+              <EarField
+                title="OI"
+                estado={form.oiCaeEstado}
+                observacion={form.oiCaeObservacion}
+                statusOptions={STATUS_OPTIONS}
+                observationOptions={CAE_OPTIONS}
+                onEstadoChange={(value) => updateField("oiCaeEstado", value)}
+                onObservacionChange={(value) => updateField("oiCaeObservacion", value as CaeObservation)}
+              />
+            }
+          />
 
-              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200">
-                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">CAE</div>
-                <div className="border-r border-slate-200 px-4 py-4">
-                  <EarField
-                    title="OD"
-                    estado={form.odCaeEstado}
-                    observacion={form.odCaeObservacion}
-                    statusOptions={STATUS_OPTIONS}
-                    observationOptions={CAE_OPTIONS}
-                    onEstadoChange={(value) => updateField("odCaeEstado", value)}
-                    onObservacionChange={(value) => updateField("odCaeObservacion", value as CaeObservation)}
-                  />
-                </div>
-                <div className="px-4 py-4">
-                  <EarField
-                    title="OI"
-                    estado={form.oiCaeEstado}
-                    observacion={form.oiCaeObservacion}
-                    statusOptions={STATUS_OPTIONS}
-                    observationOptions={CAE_OPTIONS}
-                    onEstadoChange={(value) => updateField("oiCaeEstado", value)}
-                    onObservacionChange={(value) => updateField("oiCaeObservacion", value as CaeObservation)}
-                  />
-                </div>
-              </div>
+          <OtoscopicComparisonCard
+            label="Membrana"
+            odContent={
+              <EarField
+                title="OD"
+                estado={form.odMembranaEstado}
+                observacion={form.odMembranaObservacion}
+                statusOptions={STATUS_OPTIONS}
+                observationOptions={MEMBRANA_OPTIONS}
+                onEstadoChange={(value) => updateField("odMembranaEstado", value)}
+                onObservacionChange={(value) => updateField("odMembranaObservacion", value as MembranaObservation)}
+              />
+            }
+            oiContent={
+              <EarField
+                title="OI"
+                estado={form.oiMembranaEstado}
+                observacion={form.oiMembranaObservacion}
+                statusOptions={STATUS_OPTIONS}
+                observationOptions={MEMBRANA_OPTIONS}
+                onEstadoChange={(value) => updateField("oiMembranaEstado", value)}
+                onObservacionChange={(value) => updateField("oiMembranaObservacion", value as MembranaObservation)}
+              />
+            }
+          />
 
-              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200">
-                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">Membrana</div>
-                <div className="border-r border-slate-200 px-4 py-4">
-                  <EarField
-                    title="OD"
-                    estado={form.odMembranaEstado}
-                    observacion={form.odMembranaObservacion}
-                    statusOptions={STATUS_OPTIONS}
-                    observationOptions={MEMBRANA_OPTIONS}
-                    onEstadoChange={(value) => updateField("odMembranaEstado", value)}
-                    onObservacionChange={(value) => updateField("odMembranaObservacion", value as MembranaObservation)}
-                  />
-                </div>
-                <div className="px-4 py-4">
-                  <EarField
-                    title="OI"
-                    estado={form.oiMembranaEstado}
-                    observacion={form.oiMembranaObservacion}
-                    statusOptions={STATUS_OPTIONS}
-                    observationOptions={MEMBRANA_OPTIONS}
-                    onEstadoChange={(value) => updateField("oiMembranaEstado", value)}
-                    onObservacionChange={(value) => updateField("oiMembranaObservacion", value as MembranaObservation)}
-                  />
-                </div>
+          <OtoscopicComparisonCard
+            label="Escala de Sullivan"
+            odContent={
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <select
+                  value={form.odSullivan}
+                  onChange={(event) => updateField("odSullivan", event.target.value as SullivanScale)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {SULLIVAN_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                </select>
               </div>
+            }
+            oiContent={
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <select
+                  value={form.oiSullivan}
+                  onChange={(event) => updateField("oiSullivan", event.target.value as SullivanScale)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {SULLIVAN_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                </select>
+              </div>
+            }
+          />
 
-              <div className="grid grid-cols-[180px_1fr_1fr] border-b border-slate-200">
-                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">Escala de Sullivan</div>
-                <div className="border-r border-slate-200 px-4 py-4">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="mb-3 text-sm font-semibold text-slate-800">OD</p>
-                    <select
-                      value={form.odSullivan}
-                      onChange={(event) => updateField("odSullivan", event.target.value as SullivanScale)}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      {SULLIVAN_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div className="px-4 py-4">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="mb-3 text-sm font-semibold text-slate-800">OI</p>
-                    <select
-                      value={form.oiSullivan}
-                      onChange={(event) => updateField("oiSullivan", event.target.value as SullivanScale)}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      {SULLIVAN_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-                    </select>
-                  </div>
-                </div>
+          <OtoscopicComparisonCard
+            label="Observaciones libres"
+            odContent={
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <textarea
+                  value={form.odObservaciones || ""}
+                  onChange={(event) => updateField("odObservaciones", event.target.value)}
+                  rows={4}
+                  placeholder="Observaciones OD"
+                  className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
               </div>
-
-              <div className="grid grid-cols-[180px_1fr_1fr]">
-                <div className="border-r border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">Observaciones libres</div>
-                <div className="border-r border-slate-200 px-4 py-4">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="mb-3 text-sm font-semibold text-slate-800">OD</p>
-                    <textarea
-                      value={form.odObservaciones || ""}
-                      onChange={(event) => updateField("odObservaciones", event.target.value)}
-                      rows={4}
-                      placeholder="Observaciones OD"
-                      className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                </div>
-                <div className="px-4 py-4">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="mb-3 text-sm font-semibold text-slate-800">OI</p>
-                    <textarea
-                      value={form.oiObservaciones || ""}
-                      onChange={(event) => updateField("oiObservaciones", event.target.value)}
-                      rows={4}
-                      placeholder="Observaciones OI"
-                      className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                </div>
+            }
+            oiContent={
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <textarea
+                  value={form.oiObservaciones || ""}
+                  onChange={(event) => updateField("oiObservaciones", event.target.value)}
+                  rows={4}
+                  placeholder="Observaciones OI"
+                  className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
               </div>
-            </div>
-          </div>
+            }
+          />
         </div>
       </section>
     </div>

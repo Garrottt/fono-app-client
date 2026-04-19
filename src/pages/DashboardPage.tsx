@@ -148,12 +148,6 @@ function DashboardPage() {
             <p className="mt-2 text-sm leading-6 text-white/75">
               Cada módulo prioriza tareas rápidas, foco clínico y lectura clara desde teléfono o tablet.
             </p>
-            <button
-              onClick={handleLogout}
-              className="mt-5 inline-flex rounded-full border border-white/20 bg-white/14 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/22"
-            >
-              Cerrar sesion
-            </button>
           </div>
         </aside>
 
@@ -242,6 +236,12 @@ function DashboardPage() {
                     <p className="text-xs uppercase tracking-[0.18em] text-white/60">Usuario</p>
                     <p className="mt-1 text-sm font-semibold">{user?.name || "Profesional"}</p>
                   </div>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                  >
+                    Cerrar sesion
+                  </button>
                 </div>
               </div>
             </header>

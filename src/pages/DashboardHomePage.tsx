@@ -1,11 +1,11 @@
 ﻿import { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import {
-  createAppointmentService,
   getAppointmentsService,
   updateAppointmentService
 } from "../services/appointment.service"
 import { getPatientsService } from "../services/patient.service"
-import type { Appointment, CreateAppointmentInput } from "../types/appointment.types"
+import type { Appointment } from "../types/appointment.types"
 import type { Patient } from "../types/patient.types"
 
 const CHILE_TIMEZONE = "America/Santiago"
@@ -16,13 +16,6 @@ const STATUS_STYLES: Record<string, string> = {
   COMPLETED: "border-emerald-200 bg-emerald-50 text-emerald-700",
   CANCELLED: "border-rose-200 bg-rose-50 text-rose-700",
   NO_SHOW: "border-slate-200 bg-slate-100 text-slate-600"
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  SCHEDULED: "Programada",
-  COMPLETED: "Completada",
-  CANCELLED: "Cancelada",
-  NO_SHOW: "No asistio"
 }
 
 const getMonthStart = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1)
@@ -41,18 +34,6 @@ const formatDateKey = (date: Date) => {
   const day = `${date.getDate()}`.padStart(2, "0")
   return `${year}-${month}-${day}`
 }
-
-const formatDateTime = (value: string) =>
-  new Date(value).toLocaleString("es-CL", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: CHILE_TIMEZONE
-  })
 
 const formatTime = (value: string) =>
   new Date(value).toLocaleTimeString("es-CL", {
@@ -85,8 +66,6 @@ const toDateTimeLocalValue = (dateString: string) => {
 }
 
 const getStatusStyle = (status: string) => STATUS_STYLES[status] || STATUS_STYLES.SCHEDULED
-const getStatusLabel = (status: string) => STATUS_LABELS[status] || status
-
 function Chevron({ direction }: { direction: "left" | "right" }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
@@ -98,17 +77,14 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
 }
 
 function DashboardHomePage() {
+  const navigate = useNavigate()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [movingAppointmentId, setMovingAppointmentId] = useState<string | null>(null)
   const [error, setError] = useState("")
   const [currentMonth, setCurrentMonth] = useState(() => getMonthStart(new Date()))
   const [selectedDate, setSelectedDate] = useState(() => toDateInputValue(new Date()))
-  const [patientId, setPatientId] = useState("")
-  const [appointmentTime, setAppointmentTime] = useState("09:00")
-  const [notes, setNotes] = useState("")
 
   useEffect(() => {
     const fetchData = async () => {
@@ -130,8 +106,6 @@ function DashboardHomePage() {
   }, [])
 
   const todayKey = toDateInputValue(new Date())
-  const selectedPatient = patients.find((patient) => patient.id === patientId)
-
   const calendarDays = useMemo(() => {
     const start = getCalendarStart(currentMonth)
     return Array.from({ length: 42 }, (_, index) => {
@@ -186,32 +160,6 @@ function DashboardHomePage() {
     day: "numeric"
   })
 
-  const handleCreateAppointment = async (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!patientId || !selectedDate || !appointmentTime) return
-
-    setSaving(true)
-    setError("")
-
-    try {
-      const input: CreateAppointmentInput = {
-        patientId,
-        datetime: `${selectedDate}T${appointmentTime}`,
-        notes: notes || undefined
-      }
-
-      const created = await createAppointmentService(input)
-      setAppointments((currentAppointments) =>
-        [...currentAppointments, created].sort((left, right) => left.datetime.localeCompare(right.datetime))
-      )
-      setNotes("")
-    } catch {
-      setError("No se pudo agendar la cita desde inicio")
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const handleMoveAppointment = async (appointmentId: string, targetDate: string) => {
     const appointment = appointments.find((currentAppointment) => currentAppointment.id === appointmentId)
     if (!appointment) return
@@ -248,6 +196,32 @@ function DashboardHomePage() {
         <div className="absolute bottom-0 left-1/3 h-36 w-36 rounded-full bg-sky-300/20 blur-3xl" />
         <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)] xl:items-end">
           <div>
+            <div className="mb-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 backdrop-blur">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">Mes activo</p>
+                <p className="mt-2 text-base font-semibold text-white">{monthLabel}</p>
+                <p className="mt-1 text-xs text-white/60">{monthAppointmentsCount} citas visibles</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 backdrop-blur">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">Dia seleccionado</p>
+                <p className="mt-2 text-base font-semibold text-white">
+                  {new Date(`${selectedDate}T12:00:00`).toLocaleDateString("es-CL", {
+                    day: "2-digit",
+                    month: "short"
+                  })}
+                </p>
+                <p className="mt-1 text-xs text-white/60">{selectedAppointments.length} cita(s) agendadas</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 backdrop-blur">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">Siguiente paciente</p>
+                <p className="mt-2 line-clamp-1 text-base font-semibold text-white">
+                  {upcomingAppointments[0]?.patient?.name || "Sin próximas citas"}
+                </p>
+                <p className="mt-1 text-xs text-white/60">
+                  {upcomingAppointments[0] ? formatTime(upcomingAppointments[0].datetime) : "Agenda despejada"}
+                </p>
+              </div>
+            </div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">Panel de inicio</p>
             <h2 className="fono-title mt-3 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">
               Un vistazo clínico rápido para decidir qué atender primero.
@@ -255,6 +229,17 @@ function DashboardHomePage() {
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
               Diseñé esta pantalla para que desde el móvil ya puedas ver agenda, pacientes activos y próximos pasos sin entrar a varias vistas.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="rounded-full border border-white/12 bg-white/8 px-3 py-1.5 text-xs font-medium text-white/75">
+                {selectedAppointments.length > 0 ? `${selectedAppointments.length} pendientes hoy` : "Sin pendientes hoy"}
+              </span>
+              <span className="rounded-full border border-emerald-300/18 bg-emerald-300/10 px-3 py-1.5 text-xs font-medium text-emerald-100">
+                {patients.length} pacientes activos
+              </span>
+              <span className="rounded-full border border-sky-300/18 bg-sky-300/10 px-3 py-1.5 text-xs font-medium text-sky-100">
+                {upcomingAppointments.length} próximas citas visibles
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -288,31 +273,55 @@ function DashboardHomePage() {
           Cargando calendario...
         </div>
       ) : (
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.8fr)]">
+        <div className="space-y-5">
           <div className="space-y-5">
             <section className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Mes actual</p>
-                <p className="mt-3 text-3xl font-semibold text-slate-950">{monthAppointmentsCount}</p>
-                <p className="mt-2 text-sm text-slate-500">citas visibles en el calendario</p>
-              </div>
-              <div className="rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Próxima acción</p>
-                <p className="mt-3 text-lg font-semibold text-slate-950">
-                  {upcomingAppointments[0]?.patient?.name || "Sin próximas citas"}
-                </p>
+              <div className="flex h-full flex-col rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Acceso rápido</p>
+                <p className="mt-3 text-lg font-semibold text-slate-950">Agendar desde Inicio</p>
                 <p className="mt-2 text-sm text-slate-500">
-                  {upcomingAppointments[0] ? formatDateTime(upcomingAppointments[0].datetime) : "Agenda libre por ahora"}
+                  Salta directo al formulario de cita usando la fecha que ya tienes seleccionada.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/appointments")}
+                  className="mt-auto inline-flex w-fit rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Ir a agendar
+                </button>
               </div>
-              <div className="rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+              <div className="flex h-full flex-col rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Próxima acción</p>
+                <p className="mt-3 text-lg font-semibold text-slate-950">Ver pacientes</p>
+                <p className="mt-2 text-sm text-slate-500">
+                  Entra rápido al listado para revisar fichas, objetivos y acceso al portal.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/patients")}
+                  className="mt-auto inline-flex w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                >
+                  Abrir pacientes
+                </button>
+              </div>
+              <div className="flex h-full flex-col rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Vista seleccionada</p>
                 <p className="mt-3 text-lg font-semibold capitalize text-slate-950">{selectedDateLabel}</p>
                 <p className="mt-2 text-sm text-slate-500">{selectedAppointments.length} citas en este día</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const calendarSection = document.getElementById("calendar-panel")
+                    calendarSection?.scrollIntoView({ behavior: "smooth", block: "start" })
+                  }}
+                  className="mt-auto inline-flex w-fit rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-100"
+                >
+                  Ver calendario
+                </button>
               </div>
             </section>
 
-            <section className="rounded-[1.8rem] border border-white/70 bg-white/78 p-4 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-5 lg:p-6">
+            <section id="calendar-panel" className="rounded-[1.8rem] border border-white/70 bg-white/78 p-4 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-5 lg:p-6">
               <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Calendario inteligente</p>
@@ -349,17 +358,17 @@ function DashboardHomePage() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto pb-2">
-                <div className="min-w-[760px]">
-                  <div className="mb-2 grid grid-cols-7 gap-2">
+              <div className="pb-2">
+                <div>
+                  <div className="mb-2 grid grid-cols-7 gap-2 lg:gap-3">
                     {WEEKDAY_LABELS.map((label) => (
-                      <div key={label} className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      <div key={label} className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400 sm:px-3 sm:text-xs">
                         {label}
                       </div>
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-7 gap-2">
+                  <div className="grid grid-cols-7 gap-2 lg:gap-3">
                     {calendarDays.map((day) => {
                       const key = formatDateKey(day)
                       const dayAppointments = appointmentsByDay[key] ?? []
@@ -382,23 +391,23 @@ function DashboardHomePage() {
                               void handleMoveAppointment(appointmentId, key)
                             }
                           }}
-                          className={`min-h-32 rounded-[1.35rem] border p-3 text-left transition-all ${
+                          className={`min-h-[7.25rem] rounded-[1.1rem] border p-2 text-left transition-all sm:min-h-[8.5rem] sm:p-3 lg:min-h-[9rem] ${
                             isSelected
                               ? "border-teal-200 bg-teal-50 shadow-[0_18px_30px_rgba(20,184,166,0.12)]"
                               : "border-slate-200 bg-slate-50/75 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white"
                           } ${!isCurrentMonth ? "opacity-45" : ""} ${isDropTarget ? "cursor-copy" : ""}`}
                         >
-                          <div className="mb-3 flex items-center justify-between gap-2">
-                            <span className={`text-sm font-semibold ${isToday ? "text-teal-700" : "text-slate-700"}`}>
+                          <div className="mb-2 flex items-center justify-between gap-1 sm:mb-3 sm:gap-2">
+                            <span className={`text-xs font-semibold sm:text-sm ${isToday ? "text-teal-700" : "text-slate-700"}`}>
                               {day.getDate()}
                             </span>
                             {dayAppointments.length > 0 && (
-                              <span className="rounded-full border border-teal-100 bg-white px-2.5 py-1 text-[11px] font-semibold text-teal-700">
+                              <span className="rounded-full border border-teal-100 bg-white px-2 py-0.5 text-[10px] font-semibold text-teal-700 sm:px-2.5 sm:py-1 sm:text-[11px]">
                                 {dayAppointments.length}
                               </span>
                             )}
                           </div>
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             {dayAppointments.slice(0, 3).map((appointment) => (
                               <div
                                 key={appointment.id}
@@ -408,14 +417,14 @@ function DashboardHomePage() {
                                   setMovingAppointmentId(appointment.id)
                                 }}
                                 onDragEnd={() => setMovingAppointmentId(null)}
-                                className={`cursor-grab rounded-xl border px-2.5 py-2 text-[11px] shadow-sm active:cursor-grabbing ${getStatusStyle(appointment.status)}`}
+                                className={`cursor-grab rounded-lg border px-2 py-1.5 text-[10px] shadow-sm active:cursor-grabbing sm:rounded-xl sm:px-2.5 sm:py-2 sm:text-[11px] ${getStatusStyle(appointment.status)}`}
                               >
                                 <div className="font-semibold">{formatTime(appointment.datetime)}</div>
                                 <div className="mt-1 truncate">{appointment.patient?.name || "Paciente"}</div>
                               </div>
                             ))}
                             {dayAppointments.length > 3 && (
-                              <div className="pl-1 text-[11px] font-semibold text-teal-700">
+                              <div className="pl-1 text-[10px] font-semibold text-teal-700 sm:text-[11px]">
                                 + {dayAppointments.length - 3} más
                               </div>
                             )}
@@ -429,133 +438,6 @@ function DashboardHomePage() {
             </section>
           </div>
 
-          <section className="space-y-5">
-            <div className="rounded-[1.8rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Detalle del día</p>
-              <h3 className="fono-title mt-2 text-2xl font-semibold capitalize text-slate-950">{selectedDateLabel}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Vista rápida de pacientes, estado y observaciones para este bloque.
-              </p>
-
-              <div className="mt-5 space-y-3">
-                {selectedAppointments.length === 0 ? (
-                  <div className="rounded-[1.4rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-400">
-                    No hay citas agendadas para este día.
-                  </div>
-                ) : (
-                  selectedAppointments.map((appointment) => (
-                    <div key={appointment.id} className="rounded-[1.35rem] border border-slate-200 bg-slate-50/75 p-4">
-                      <div className="flex flex-col gap-3">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-900">{appointment.patient?.name || "Paciente"}</p>
-                            <p className="mt-1 text-xs text-slate-500">{formatDateTime(appointment.datetime)}</p>
-                          </div>
-                          <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getStatusStyle(appointment.status)}`}>
-                            {getStatusLabel(appointment.status)}
-                          </span>
-                        </div>
-                        {appointment.notes && <p className="text-sm leading-6 text-slate-600">{appointment.notes}</p>}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-[1.8rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Próximas citas</p>
-              <h3 className="fono-title mt-2 text-2xl font-semibold text-slate-950">Lo que viene</h3>
-              <div className="mt-5 space-y-3">
-                {upcomingAppointments.length === 0 ? (
-                  <div className="rounded-[1.4rem] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">
-                    No hay próximas citas programadas.
-                  </div>
-                ) : (
-                  upcomingAppointments.map((appointment) => (
-                    <div key={appointment.id} className="rounded-[1.3rem] border border-slate-200 bg-white p-4 shadow-sm">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">{appointment.patient?.name || "Paciente"}</p>
-                          <p className="mt-1 text-xs text-slate-500">{formatDateTime(appointment.datetime)}</p>
-                        </div>
-                        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getStatusStyle(appointment.status)}`}>
-                          {getStatusLabel(appointment.status)}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-[1.8rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Acción rápida</p>
-              <h3 className="fono-title mt-2 text-2xl font-semibold text-slate-950">Agendar desde inicio</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Pensado para móvil: fecha preseleccionada, menos campos visibles y foco en completar rápido.
-              </p>
-
-              <form onSubmit={handleCreateAppointment} className="mt-5 flex flex-col gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold text-slate-700">Paciente</label>
-                  <select
-                    value={patientId}
-                    onChange={(event) => setPatientId(event.target.value)}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
-                    required
-                  >
-                    <option value="">Selecciona un paciente</option>
-                    {patients.map((patient) => (
-                      <option key={patient.id} value={patient.id}>{patient.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-semibold text-slate-700">Fecha</label>
-                    <input
-                      type="date"
-                      value={selectedDate}
-                      onChange={(event) => setSelectedDate(event.target.value)}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-semibold text-slate-700">Hora</label>
-                    <input
-                      type="time"
-                      value={appointmentTime}
-                      onChange={(event) => setAppointmentTime(event.target.value)}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold text-slate-700">Notas</label>
-                  <textarea
-                    value={notes}
-                    onChange={(event) => setNotes(event.target.value)}
-                    rows={3}
-                    className="resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
-                    placeholder={selectedPatient ? `Observaciones para ${selectedPatient.name}...` : "Observaciones de la cita..."}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={saving || !patientId}
-                  className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,23,42,0.16)] transition hover:bg-slate-800 disabled:opacity-50"
-                >
-                  {saving ? "Agendando..." : "Agendar cita"}
-                </button>
-              </form>
-            </div>
-          </section>
         </div>
       )}
     </div>

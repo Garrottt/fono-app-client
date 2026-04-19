@@ -28,6 +28,12 @@ export interface Patient {
   email?: string
   phone?: string
   diagnosis?: string
+  generalObjective?: string
+  contentHierarchy?: string[]
+  hierarchyCriteria?: string
+  focus?: string
+  modality?: string
+  strategies?: string
   active: boolean
   createdAt: string
   user?: PatientPortalUser | null
@@ -41,6 +47,12 @@ export interface CreatePatientInput {
   email?: string
   phone?: string
   diagnosis?: string
+  generalObjective?: string
+  contentHierarchy?: string[]
+  hierarchyCriteria?: string
+  focus?: string
+  modality?: string
+  strategies?: string
 }
 
 export interface UpdatePatientInput {
@@ -49,6 +61,12 @@ export interface UpdatePatientInput {
   email?: string
   phone?: string
   diagnosis?: string
+  generalObjective?: string
+  contentHierarchy?: string[]
+  hierarchyCriteria?: string
+  focus?: string
+  modality?: string
+  strategies?: string
 }
 
 export interface ConfigurePortalAccessInput {

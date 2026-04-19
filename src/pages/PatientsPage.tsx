@@ -253,7 +253,7 @@ function PatientsPage() {
                 key={patient.id}
                 className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_14px_28px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(15,23,42,0.1)]"
               >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex flex-col gap-5">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
@@ -279,11 +279,19 @@ function PatientsPage() {
                       )}
                     </div>
 
-                    <div className="mt-4 grid grid-cols-1 gap-2 text-sm text-slate-500 sm:grid-cols-2">
-                      <p><span className="font-semibold text-slate-700">Edad:</span> {patient.age ?? "-"}</p>
-                      <p><span className="font-semibold text-slate-700">Email:</span> {patient.email || "-"}</p>
-                      <p><span className="font-semibold text-slate-700">Teléfono:</span> {patient.phone || "-"}</p>
-                      <p><span className="font-semibold text-slate-700">Estado:</span> {patient.active ? "Activo" : "Inactivo"}</p>
+                    <div className="mt-4 grid grid-cols-1 gap-3 text-sm text-slate-500 sm:grid-cols-2">
+                      <p className="min-w-0">
+                        <span className="font-semibold text-slate-700">Edad:</span> {patient.age ?? "-"}
+                      </p>
+                      <p className="min-w-0 break-all">
+                        <span className="font-semibold text-slate-700">Email:</span> {patient.email || "-"}
+                      </p>
+                      <p className="min-w-0 break-all">
+                        <span className="font-semibold text-slate-700">Teléfono:</span> {patient.phone || "-"}
+                      </p>
+                      <p className="min-w-0">
+                        <span className="font-semibold text-slate-700">Estado:</span> {patient.active ? "Activo" : "Inactivo"}
+                      </p>
                     </div>
 
                     <p className="mt-4 line-clamp-2 text-sm leading-6 text-slate-500">
@@ -291,16 +299,16 @@ function PatientsPage() {
                     </p>
                   </div>
 
-                  <div className="flex gap-2 sm:flex-col sm:items-end">
+                  <div className="flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
                     <Link
                       to={`/patients/${patient.id}`}
-                      className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                      className="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
                     >
                       Ver ficha
                     </Link>
                     <button
                       onClick={() => handleDeactivate(patient.id)}
-                      className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-100"
+                      className="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-100"
                     >
                       Desactivar
                     </button>

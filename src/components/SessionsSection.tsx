@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import type { FormEvent } from "react"
 import {
   createSessionService,
@@ -8,6 +8,8 @@ import {
   updateSessionService
 } from "../services/session.service"
 import { API_URL } from "../services/api"
+import { getGoalsService } from "../services/goal.service"
+import type { Goal } from "../types/goal.types"
 import type {
   CreateSessionInput,
   Session,
@@ -16,6 +18,13 @@ import type {
 
 interface SessionsSectionProps {
   patientId: string
+  generalObjective: string
+  contentHierarchy: string[]
+  hierarchyCriteria: string
+  focus: string
+  modality: string
+  strategies: string
+  goalsRefreshToken?: number
   sessions: Session[]
   onSessionsChange: (sessions: Session[]) => void
   onError: (message: string) => void
@@ -24,6 +33,29 @@ interface SessionsSectionProps {
 interface SessionFormState extends CreateSessionInput {}
 
 type SessionFormUpdater = (updater: (current: SessionFormState) => SessionFormState) => void
+
+interface SpecificObjectiveLibraryItem {
+  id: string
+  description: string
+  operationalObjectives: string[]
+}
+
+const getRequestErrorMessage = (error: unknown, fallbackMessage: string) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof (error as { response?: unknown }).response === "object" &&
+    (error as { response?: { data?: unknown } }).response !== null
+  ) {
+    const response = (error as { response?: { data?: { message?: unknown } } }).response
+    if (typeof response?.data?.message === "string" && response.data.message.trim()) {
+      return response.data.message
+    }
+  }
+
+  return fallbackMessage
+}
 
 const createOperationalObjective = (description = "") => ({
   description,
@@ -54,8 +86,8 @@ const createEmptySessionForm = (): SessionFormState => ({
   modality: "",
   strategies: "",
   generalObjective: "",
-  specificObjectives: [createSpecificObjective()],
-  sessionTasks: [createTask()]
+  specificObjectives: [],
+  sessionTasks: []
 })
 
 const mapSessionToForm = (session: Session): SessionFormState => ({
@@ -80,7 +112,7 @@ const mapSessionToForm = (session: Session): SessionFormState => ({
         }))
         : [createOperationalObjective()]
     }))
-    : [createSpecificObjective()],
+    : [],
   sessionTasks: session.sessionTasks.length > 0
     ? session.sessionTasks.map((sessionTask, taskIndex) => ({
       id: sessionTask.id,
@@ -88,7 +120,7 @@ const mapSessionToForm = (session: Session): SessionFormState => ({
       description: sessionTask.description || "",
       order: taskIndex + 1
     }))
-    : [createTask()]
+    : []
 })
 
 const normalizeSessionForm = (form: SessionFormState): CreateSessionInput => ({
@@ -201,7 +233,19 @@ function TaskFilesList({
   )
 }
 
-function SessionsSection({ patientId, sessions, onSessionsChange, onError }: SessionsSectionProps) {
+function SessionsSection({
+  patientId,
+  generalObjective,
+  contentHierarchy,
+  hierarchyCriteria,
+  focus,
+  modality,
+  strategies,
+  goalsRefreshToken = 0,
+  sessions,
+  onSessionsChange,
+  onError
+}: SessionsSectionProps) {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(sessions[0]?.id || null)
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null)
@@ -210,10 +254,45 @@ function SessionsSection({ patientId, sessions, onSessionsChange, onError }: Ses
   const [sessionMessage, setSessionMessage] = useState("")
   const [createForm, setCreateForm] = useState<SessionFormState>(createEmptySessionForm())
   const [editForm, setEditForm] = useState<SessionFormState | null>(null)
+  const [goals, setGoals] = useState<Goal[]>([])
+  const [specificObjectiveSearch, setSpecificObjectiveSearch] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    let ignore = false
+
+    const fetchGoals = async () => {
+      try {
+        const goalData = await getGoalsService(patientId)
+        if (!ignore) {
+          setGoals(goalData)
+        }
+      } catch (error) {
+        if (!ignore) {
+          setGoals([])
+        }
+      }
+    }
+
+    fetchGoals()
+
+    return () => {
+      ignore = true
+    }
+  }, [patientId, goalsRefreshToken])
 
   const orderedSessions = useMemo(
     () => [...sessions].sort((left, right) => new Date(right.date).getTime() - new Date(left.date).getTime()),
     [sessions]
+  )
+
+  const specificObjectiveLibrary = useMemo<SpecificObjectiveLibraryItem[]>(
+    () =>
+      goals.map((goal) => ({
+        id: goal.id,
+        description: goal.description,
+        operationalObjectives: goal.operationalGoals.map((operationalGoal) => operationalGoal.description)
+      })),
+    [goals]
   )
 
   const updateCreateForm: SessionFormUpdater = (updater) => {
@@ -224,9 +303,72 @@ function SessionsSection({ patientId, sessions, onSessionsChange, onError }: Ses
     setEditForm((current) => current ? updater(current) : current)
   }
 
+  const updateSpecificObjectiveSearch = (key: string, value: string) => {
+    setSpecificObjectiveSearch((current) => ({
+      ...current,
+      [key]: value
+    }))
+  }
+
+  const clearSpecificObjectiveSearch = (key: string) => {
+    setSpecificObjectiveSearch((current) => ({
+      ...current,
+      [key]: ""
+    }))
+  }
+
+  const getSpecificObjectiveMatches = (query: string) => {
+    const normalizedQuery = query.trim().toLowerCase()
+    const filteredLibrary = specificObjectiveLibrary.filter((item) => {
+      if (!normalizedQuery) return true
+
+      return (
+        item.description.toLowerCase().includes(normalizedQuery) ||
+        item.operationalObjectives.some((operationalObjective) =>
+          operationalObjective.toLowerCase().includes(normalizedQuery)
+        )
+      )
+    })
+
+    return filteredLibrary.slice(0, normalizedQuery ? 8 : 4)
+  }
+
+  const addSpecificObjectiveFromLibrary = (
+    setForm: SessionFormUpdater,
+    libraryItem: SpecificObjectiveLibraryItem,
+    searchKey: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      specificObjectives: current.specificObjectives.some(
+        (specificObjective) => specificObjective.description.trim().toLowerCase() === libraryItem.description.trim().toLowerCase()
+      )
+        ? current.specificObjectives
+        : [
+          ...current.specificObjectives.filter((specificObjective) =>
+            specificObjective.description.trim() || specificObjective.operationalObjectives.some((item) => item.description.trim())
+          ),
+          createSpecificObjective(libraryItem.description, libraryItem.operationalObjectives.length > 0
+            ? libraryItem.operationalObjectives
+            : [""])
+        ]
+    }))
+
+    clearSpecificObjectiveSearch(searchKey)
+  }
+
   const resetCreateForm = () => {
-    setCreateForm(createEmptySessionForm())
+    setCreateForm({
+      ...createEmptySessionForm(),
+      generalObjective: generalObjective.trim(),
+      contentHierarchy: contentHierarchy.map((item) => item.trim()).filter(Boolean),
+      hierarchyCriteria: hierarchyCriteria.trim(),
+      focus: focus.trim(),
+      modality: modality.trim(),
+      strategies: strategies.trim()
+    })
     setShowCreateForm(false)
+    setSpecificObjectiveSearch({})
   }
 
   const handleCreateSession = async (event: FormEvent) => {
@@ -236,7 +378,15 @@ function SessionsSection({ patientId, sessions, onSessionsChange, onError }: Ses
     onError("")
 
     try {
-      const payload = normalizeSessionForm(createForm)
+      const payload = normalizeSessionForm({
+        ...createForm,
+        generalObjective: generalObjective.trim(),
+        contentHierarchy: contentHierarchy.map((item) => item.trim()).filter(Boolean),
+        hierarchyCriteria: hierarchyCriteria.trim(),
+        focus: focus.trim(),
+        modality: modality.trim(),
+        strategies: strategies.trim()
+      })
       const createdSession = await createSessionService(patientId, payload)
       const nextSessions = [createdSession, ...sessions].sort(
         (left, right) => new Date(right.date).getTime() - new Date(left.date).getTime()
@@ -247,7 +397,7 @@ function SessionsSection({ patientId, sessions, onSessionsChange, onError }: Ses
       resetCreateForm()
       setSessionMessage("Sesion guardada correctamente.")
     } catch (error) {
-      onError("Error al guardar la sesion. Revisa que la ficha clinica este completa.")
+      onError(getRequestErrorMessage(error, "Error al guardar la sesion. Revisa que la ficha clinica este completa."))
     } finally {
       setSaving(false)
     }
@@ -261,7 +411,19 @@ function SessionsSection({ patientId, sessions, onSessionsChange, onError }: Ses
     onError("")
 
     try {
-      const updatedSession = await updateSessionService(patientId, sessionId, normalizeSessionForm(editForm))
+      const updatedSession = await updateSessionService(
+        patientId,
+        sessionId,
+        normalizeSessionForm({
+          ...editForm,
+          generalObjective: generalObjective.trim(),
+          contentHierarchy: contentHierarchy.map((item) => item.trim()).filter(Boolean),
+          hierarchyCriteria: hierarchyCriteria.trim(),
+          focus: focus.trim(),
+          modality: modality.trim(),
+          strategies: strategies.trim()
+        })
+      )
       onSessionsChange(
         sessions
           .map((session) => session.id === sessionId ? updatedSession : session)
@@ -271,7 +433,7 @@ function SessionsSection({ patientId, sessions, onSessionsChange, onError }: Ses
       setEditForm(null)
       setSessionMessage(`Sesion ${updatedSession.sessionNumber} actualizada.`)
     } catch (error) {
-      onError("Error al actualizar la sesion.")
+      onError(getRequestErrorMessage(error, "Error al actualizar la sesion."))
     } finally {
       setSaving(false)
     }
@@ -385,6 +547,7 @@ const renderSessionForm = (
   actionLabel: string,
   submitDisabled: boolean,
   submitMode: "submit" | "button",
+  formKey: string,
   actionHandler?: () => void
 ) => (
     <div className="space-y-6">
@@ -399,110 +562,12 @@ const renderSessionForm = (
             required
           />
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-slate-700">Resumen de lo trabajado</label>
-          <textarea
-            value={form.whatWasDone}
-            onChange={(event) => setForm((current) => ({ ...current, whatWasDone: event.target.value }))}
-            className="min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            placeholder="Describe lo trabajado, avances, dificultades o acuerdos de la sesion."
-            required
-          />
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-2xl border border-slate-200">
-        <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Jerarquizacion de contenidos de intervencion
-            </h4>
-            <button
-              type="button"
-              onClick={() => setForm((current) => ({
-                ...current,
-                contentHierarchy: [...current.contentHierarchy, ""]
-              }))}
-              className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
-            >
-              + Agregar contenido
-            </button>
-          </div>
-        </div>
-        <div className="divide-y divide-slate-200">
-          {form.contentHierarchy.map((item, index) => (
-            <div key={`hierarchy-${index}`} className="grid grid-cols-[56px_minmax(0,1fr)] gap-0">
-              <div className="border-r border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
-                {index + 1}
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2">
-                <input
-                  type="text"
-                  value={item}
-                  onChange={(event) => setForm((current) => ({
-                    ...current,
-                    contentHierarchy: current.contentHierarchy.map((currentItem, currentIndex) =>
-                      currentIndex === index ? event.target.value : currentItem
-                    )
-                  }))}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                  placeholder={`Contenido priorizado ${index + 1}`}
-                />
-                {form.contentHierarchy.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setForm((current) => ({
-                      ...current,
-                      contentHierarchy: current.contentHierarchy.filter((_, currentIndex) => currentIndex !== index)
-                    }))}
-                    className="shrink-0 rounded-lg border border-rose-200 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50"
-                  >
-                    Eliminar
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-          {[
-            { label: "Criterio(s) de jerarquizacion", key: "hierarchyCriteria" as const },
-            { label: "Enfoque", key: "focus" as const },
-            { label: "Modalidad", key: "modality" as const },
-            { label: "Estrategia/s", key: "strategies" as const }
-          ].map((field) => (
-            <div
-              key={field.key}
-              className="grid grid-cols-1 border-t border-slate-200 md:grid-cols-[240px_minmax(0,1fr)]"
-            >
-              <div className="border-r border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
-                {field.label}
-              </div>
-              <div className="px-3 py-2">
-                {field.key === "strategies" ? (
-                  <textarea
-                    value={form[field.key]}
-                    onChange={(event) => setForm((current) => ({ ...current, [field.key]: event.target.value }))}
-                    className="min-h-24 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    required
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    value={form[field.key]}
-                    onChange={(event) => setForm((current) => ({ ...current, [field.key]: event.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    required
-                  />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
           <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-            Objetivo general / meta
+            Objetivo general vigente
           </h4>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-[120px_minmax(0,1fr)]">
@@ -510,165 +575,164 @@ const renderSessionForm = (
             O.G.1
           </div>
           <div className="px-3 py-2">
-            <textarea
-              value={form.generalObjective}
-              onChange={(event) => setForm((current) => ({ ...current, generalObjective: event.target.value }))}
-              className="min-h-24 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              required
-            />
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+              <p className="text-sm leading-relaxed text-slate-700">
+                {generalObjective.trim() || "Debes registrar primero el objetivo general en el bloque de Objetivos."}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="rounded-2xl border border-slate-200">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Objetivos especificos y operacionales
-            </h4>
-            <button
-              type="button"
-              onClick={() => setForm((current) => ({
-                ...current,
-                specificObjectives: [
-                  ...current.specificObjectives,
-                  createSpecificObjective()
-                ]
-              }))}
-              className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
-            >
-              + Agregar O.E.
-            </button>
-          </div>
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+            Objetivos especificos y operacionales
+          </h4>
         </div>
         <div className="space-y-4 p-4">
-          {form.specificObjectives.map((specificObjective, specificIndex) => (
-            <div key={`specific-${specificIndex}`} className="rounded-2xl border border-slate-200">
-              <div className="grid grid-cols-1 gap-0 lg:grid-cols-[260px_minmax(0,1fr)]">
-                <div className="border-b border-slate-200 bg-slate-50 p-4 lg:border-b-0 lg:border-r">
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-700">O.E.{specificIndex + 1}</p>
-                    {form.specificObjectives.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => setForm((current) => ({
-                          ...current,
-                          specificObjectives: current.specificObjectives.filter((_, index) => index !== specificIndex)
-                        }))}
-                        className="text-xs font-medium text-rose-500 hover:text-rose-700"
-                      >
-                        Eliminar
-                      </button>
-                    )}
+          {(() => {
+            const searchKey = `${formKey}-global-specific-search`
+            const searchQuery = specificObjectiveSearch[searchKey] || ""
+            const specificObjectiveMatches = getSpecificObjectiveMatches(searchQuery)
+
+            return (
+              <div className="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/70 p-4">
+                <div className="flex flex-col gap-3">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-indigo-500">
+                      Buscar objetivo especifico
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      Busca un O.E. existente y trae automáticamente sus objetivos operacionales asociados.
+                    </p>
                   </div>
-                  <textarea
-                    value={specificObjective.description}
-                    onChange={(event) => setForm((current) => ({
-                      ...current,
-                      specificObjectives: current.specificObjectives.map((currentObjective, currentIndex) =>
-                        currentIndex === specificIndex
-                          ? { ...currentObjective, description: event.target.value }
-                          : currentObjective
-                      )
-                    }))}
-                    className="min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Describe el objetivo especifico."
-                    required
-                  />
+                  <div className="w-full xl:max-w-3xl">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(event) => updateSpecificObjectiveSearch(searchKey, event.target.value)}
+                      disabled={specificObjectiveLibrary.length === 0}
+                      className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+                      placeholder="Buscar por texto del O.E. o de sus O.O."
+                    />
+                  </div>
                 </div>
-                <div className="p-4">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-700">Objetivos operacionales</p>
-                    <button
-                      type="button"
-                      onClick={() => setForm((current) => ({
-                        ...current,
-                        specificObjectives: current.specificObjectives.map((currentObjective, currentIndex) =>
-                          currentIndex === specificIndex
-                            ? {
-                              ...currentObjective,
-                              operationalObjectives: [
-                                ...currentObjective.operationalObjectives,
-                                createOperationalObjective()
-                              ]
-                            }
-                            : currentObjective
-                        )
-                      }))}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    >
-                      + Agregar O.O.
-                    </button>
-                  </div>
-                  <div className="space-y-3">
-                    {specificObjective.operationalObjectives.map((operationalObjective, operationalIndex) => (
-                      <div key={`operational-${specificIndex}-${operationalIndex}`} className="rounded-xl border border-slate-200 p-3">
-                        <div className="mb-2 flex items-center justify-between gap-3">
-                          <p className="text-sm font-semibold text-slate-700">O.O.{operationalIndex + 1}</p>
-                          {specificObjective.operationalObjectives.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => setForm((current) => ({
-                                ...current,
-                                specificObjectives: current.specificObjectives.map((currentObjective, currentIndex) =>
-                                  currentIndex === specificIndex
-                                    ? {
-                                      ...currentObjective,
-                                      operationalObjectives: currentObjective.operationalObjectives.filter(
-                                        (_, index) => index !== operationalIndex
-                                      )
-                                    }
-                                    : currentObjective
-                                )
-                              }))}
-                              className="text-xs font-medium text-rose-500 hover:text-rose-700"
-                            >
-                              Eliminar
-                            </button>
-                          )}
+
+                {specificObjectiveLibrary.length === 0 ? (
+                  <p className="mt-3 text-sm text-slate-500">
+                    Primero carga objetivos especificos y operacionales en el bloque de Objetivos.
+                  </p>
+                ) : specificObjectiveMatches.length === 0 ? (
+                  <p className="mt-3 text-sm text-slate-500">
+                    No encontramos coincidencias con esa búsqueda.
+                  </p>
+                ) : (
+                  <div className="mt-3 grid gap-2">
+                    {specificObjectiveMatches.map((libraryItem) => (
+                      <div
+                        key={`${searchKey}-${libraryItem.id}`}
+                        className="flex flex-col gap-3 rounded-xl border border-white bg-white px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-slate-700">{libraryItem.description}</p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            {libraryItem.operationalObjectives.length} objetivo(s) operacional(es) asociados
+                          </p>
                         </div>
-                        <input
-                          type="text"
-                          value={operationalObjective.description}
-                          onChange={(event) => setForm((current) => ({
-                            ...current,
-                            specificObjectives: current.specificObjectives.map((currentObjective, currentIndex) =>
-                              currentIndex === specificIndex
-                                ? {
-                                  ...currentObjective,
-                                  operationalObjectives: currentObjective.operationalObjectives.map(
-                                    (currentOperationalObjective, currentOperationalIndex) =>
-                                      currentOperationalIndex === operationalIndex
-                                        ? {
-                                          ...currentOperationalObjective,
-                                          description: event.target.value
-                                        }
-                                        : currentOperationalObjective
-                                  )
-                                }
-                                : currentObjective
-                            )
-                          }))}
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                          placeholder="Describe el objetivo operacional."
-                          required
-                        />
+                        <button
+                          type="button"
+                          onClick={() => addSpecificObjectiveFromLibrary(
+                            setForm,
+                            libraryItem,
+                            searchKey
+                          )}
+                          className="rounded-lg border border-indigo-200 px-3 py-2 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50"
+                        >
+                          Agregar O.E.
+                        </button>
                       </div>
                     ))}
                   </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {form.specificObjectives.map((specificObjective, specificIndex) => {
+            return (
+              <div key={`specific-${specificIndex}`} className="rounded-2xl border border-slate-200">
+                <div className="grid grid-cols-1 gap-0 lg:grid-cols-[260px_minmax(0,1fr)]">
+                  <div className="border-b border-slate-200 bg-slate-50 p-4 lg:border-b-0 lg:border-r">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-slate-700">O.E.{specificIndex + 1}</p>
+                      {form.specificObjectives.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setForm((current) => ({
+                            ...current,
+                            specificObjectives: current.specificObjectives.filter((_, index) => index !== specificIndex)
+                          }))}
+                          className="text-xs font-medium text-rose-500 hover:text-rose-700"
+                        >
+                          Eliminar
+                        </button>
+                      )}
+                    </div>
+                    <div className="rounded-xl border border-slate-200 bg-white px-3 py-3">
+                      <p className="text-sm leading-relaxed text-slate-700">
+                        {specificObjective.description || "Selecciona un objetivo especifico desde el buscador."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4 p-4">
+                    <div>
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-slate-700">Objetivos operacionales</p>
+                        <span className="text-xs text-slate-500">Solo lectura</span>
+                      </div>
+                      <div className="space-y-3">
+                        {specificObjective.operationalObjectives.map((operationalObjective, operationalIndex) => (
+                          <div key={`operational-${specificIndex}-${operationalIndex}`} className="rounded-xl border border-slate-200 p-3">
+                            <div className="mb-2 flex items-center justify-between gap-3">
+                              <p className="text-sm font-semibold text-slate-700">O.O.{operationalIndex + 1}</p>
+                            </div>
+                            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                              {operationalObjective.description}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
+      {form.specificObjectives.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center">
+          <p className="text-sm text-slate-500">
+            Todavia no has asociado objetivos especificos a esta sesion.
+          </p>
+          <p className="mt-2 text-xs text-slate-400">
+            Puedes guardar la sesion igual y vincular los O.E. mas tarde desde este mismo bloque.
+          </p>
+        </div>
+      )}
         </div>
       </div>
 
       <div className="rounded-2xl border border-slate-200">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Tareas e indicaciones de la sesion
-            </h4>
+            <div>
+              <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                Tareas e indicaciones de la sesion
+              </h4>
+              <p className="mt-1 text-xs text-slate-500">
+                Opcional. Agrega indicaciones solo cuando corresponda.
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => setForm((current) => ({
@@ -682,6 +746,13 @@ const renderSessionForm = (
           </div>
         </div>
         <div className="space-y-3 p-4">
+          {form.sessionTasks.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-6 text-center">
+              <p className="text-sm text-slate-500">
+                No hay tareas ni indicaciones cargadas en esta sesion.
+              </p>
+            </div>
+          )}
           {form.sessionTasks.map((sessionTask, taskIndex) => (
             <div key={`task-${taskIndex}`} className="rounded-2xl border border-slate-200 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
@@ -713,7 +784,6 @@ const renderSessionForm = (
                   }))}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                   placeholder="Titulo o nombre de la indicacion"
-                  required
                 />
                 <textarea
                   value={sessionTask.description || ""}
@@ -775,6 +845,21 @@ const renderSessionForm = (
         </div>
       </div>
 
+      <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
+        <div>
+          <label className="text-sm font-medium text-slate-700">Resumen de lo trabajado</label>
+          <p className="mt-1 text-xs text-slate-500">
+            Opcional. Puedes guardarlo despues si en este momento solo quieres planificar la sesion.
+          </p>
+        </div>
+        <textarea
+          value={form.whatWasDone}
+          onChange={(event) => setForm((current) => ({ ...current, whatWasDone: event.target.value }))}
+          className="min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          placeholder="Describe lo trabajado, avances, dificultades o acuerdos de la sesion."
+        />
+      </div>
+
       <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-end">
         <button
           type={submitMode}
@@ -824,7 +909,20 @@ const renderSessionForm = (
             <p className="text-xs uppercase tracking-[0.3em] text-indigo-400">Nueva sesion</p>
             <h4 className="mt-1 text-lg font-semibold text-slate-800">Planificacion de sesion</h4>
           </div>
-          {renderSessionForm(createForm, updateCreateForm, "Guardar sesion", saving, "submit")}
+          {renderSessionForm(
+            { ...createForm, generalObjective: generalObjective.trim() },
+            updateCreateForm,
+            "Guardar sesion",
+            saving ||
+              !generalObjective.trim() ||
+              !contentHierarchy.some((item) => item.trim()) ||
+              !hierarchyCriteria.trim() ||
+              !focus.trim() ||
+              !modality.trim() ||
+              !strategies.trim(),
+            "submit",
+            "create"
+          )}
         </form>
       )}
 
@@ -909,8 +1007,15 @@ const renderSessionForm = (
                           editForm,
                           updateEditForm,
                           "Guardar cambios",
-                          saving,
+                          saving ||
+                            !generalObjective.trim() ||
+                            !contentHierarchy.some((item) => item.trim()) ||
+                            !hierarchyCriteria.trim() ||
+                            !focus.trim() ||
+                            !modality.trim() ||
+                            !strategies.trim(),
                           "button",
+                          `edit-${session.id}`,
                           () => handleUpdateSession(session.id)
                         )}
                         <div className="flex justify-end">
@@ -928,36 +1033,6 @@ const renderSessionForm = (
                       </div>
                     ) : (
                       <div className="space-y-6">
-                        <section className="rounded-2xl border border-slate-200">
-                          <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-                            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                              Jerarquizacion de contenidos de intervencion
-                            </h4>
-                          </div>
-                          <div className="divide-y divide-slate-200">
-                            {session.contentHierarchy.map((item, index) => (
-                              <div key={`content-view-${session.id}-${index}`} className="grid grid-cols-[56px_minmax(0,1fr)]">
-                                <div className="border-r border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
-                                  {index + 1}
-                                </div>
-                                <div className="px-4 py-3 text-sm text-slate-700">{item || "—"}</div>
-                              </div>
-                            ))}
-                            {[
-                              ["Criterio(s) de jerarquizacion", session.hierarchyCriteria],
-                              ["Enfoque", session.focus],
-                              ["Modalidad", session.modality],
-                              ["Estrategia/s", session.strategies]
-                            ].map(([label, value]) => (
-                              <div key={`${session.id}-${label}`} className="grid grid-cols-1 md:grid-cols-[240px_minmax(0,1fr)]">
-                                <div className="border-r border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
-                                  {label}
-                                </div>
-                                <div className="px-4 py-3 text-sm text-slate-700">{value || "—"}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </section>
 
                         <section className="rounded-2xl border border-slate-200">
                           <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">

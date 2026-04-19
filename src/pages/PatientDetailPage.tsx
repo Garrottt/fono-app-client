@@ -8,6 +8,8 @@ import {
   configurePortalAccessService
 } from "../services/patient.service"
 import { getSessionsService } from "../services/session.service"
+import InterventionHierarchySection from "../components/InterventionHierarchySection"
+import GoalsSection from "../components/GoalsSection"
 import SessionsSection from "../components/SessionsSection"
 
 function PatientDetailPage() {
@@ -29,6 +31,7 @@ function PatientDetailPage() {
   const [portalPassword, setPortalPassword] = useState("")
   const [portalSaving, setPortalSaving] = useState(false)
   const [portalMessage, setPortalMessage] = useState("")
+  const [goalsRefreshToken, setGoalsRefreshToken] = useState(0)
 
   useEffect(() => {
     if (id) fetchData(id)
@@ -293,8 +296,40 @@ function PatientDetailPage() {
 
       {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
       {id && (
+        <InterventionHierarchySection
+          patientId={id}
+          contentHierarchy={patient?.contentHierarchy || []}
+          hierarchyCriteria={patient?.hierarchyCriteria || ""}
+          focus={patient?.focus || ""}
+          modality={patient?.modality || ""}
+          strategies={patient?.strategies || ""}
+          onSaved={(payload) => setPatient((current) => (
+            current ? { ...current, ...payload } : current
+          ))}
+        />
+      )}
+      {id && <div className="h-6" />}
+      {id && (
+        <GoalsSection
+          patientId={id}
+          currentGeneralObjective={patient?.generalObjective || ""}
+          onGeneralObjectiveSaved={(generalObjective) => setPatient((current) => (
+            current ? { ...current, generalObjective } : current
+          ))}
+          onGoalsUpdated={() => setGoalsRefreshToken((current) => current + 1)}
+        />
+      )}
+      {id && <div className="h-6" />}
+      {id && (
         <SessionsSection
           patientId={id}
+          generalObjective={patient?.generalObjective || ""}
+          contentHierarchy={patient?.contentHierarchy || []}
+          hierarchyCriteria={patient?.hierarchyCriteria || ""}
+          focus={patient?.focus || ""}
+          modality={patient?.modality || ""}
+          strategies={patient?.strategies || ""}
+          goalsRefreshToken={goalsRefreshToken}
           sessions={sessions}
           onSessionsChange={setSessions}
           onError={setError}
