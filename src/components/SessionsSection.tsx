@@ -319,9 +319,9 @@ function SessionsSection({
 
   const getSpecificObjectiveMatches = (query: string) => {
     const normalizedQuery = query.trim().toLowerCase()
-    const filteredLibrary = specificObjectiveLibrary.filter((item) => {
-      if (!normalizedQuery) return true
+    if (!normalizedQuery) return []
 
+    const filteredLibrary = specificObjectiveLibrary.filter((item) => {
       return (
         item.description.toLowerCase().includes(normalizedQuery) ||
         item.operationalObjectives.some((operationalObjective) =>
@@ -330,7 +330,7 @@ function SessionsSection({
       )
     })
 
-    return filteredLibrary.slice(0, normalizedQuery ? 8 : 4)
+    return filteredLibrary.slice(0, 8)
   }
 
   const addSpecificObjectiveFromLibrary = (
@@ -622,6 +622,10 @@ const renderSessionForm = (
                 {specificObjectiveLibrary.length === 0 ? (
                   <p className="mt-3 text-sm text-slate-500">
                     Primero carga objetivos específicos y operacionales en el bloque de Objetivos.
+                  </p>
+                ) : !searchQuery.trim() ? (
+                  <p className="mt-3 text-sm text-slate-500">
+                    Escribe un objetivo específico o una palabra clave para comenzar la búsqueda.
                   </p>
                 ) : specificObjectiveMatches.length === 0 ? (
                   <p className="mt-3 text-sm text-slate-500">
