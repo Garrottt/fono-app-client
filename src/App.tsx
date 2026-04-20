@@ -11,10 +11,20 @@ import PasswordSetupPage from "./pages/PasswordSetupPage"
 import AnamnesisPage from "./pages/AnamnesisPage"
 import PreLavadoPage from "./pages/PreLavadoPage"
 
-function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, authLoading } = useAuth()
+function PrivateRoute({
+  children,
+  allowedRoles
+}: {
+  children: React.ReactNode
+  allowedRoles?: Array<"PROFESSIONAL" | "PATIENT">
+}) {
+  const { isAuthenticated, authLoading, user } = useAuth()
   if (authLoading) return null
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />
+  if (!isAuthenticated) return <Navigate to="/login" />
+  if (allowedRoles && (!user || !allowedRoles.includes(user.role))) {
+    return <Navigate to={user?.role === "PATIENT" ? "/portal" : "/dashboard"} />
+  }
+  return <>{children}</>
 }
 
 function AppRoutes() {
@@ -49,7 +59,7 @@ function AppRoutes() {
       <Route
         path="/"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={["PROFESSIONAL"]}>
             <DashboardPage />
           </PrivateRoute>
         }
@@ -65,7 +75,7 @@ function AppRoutes() {
       <Route
         path="/portal"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={["PATIENT"]}>
             <PatientPortalPage />
           </PrivateRoute>
         }

@@ -128,7 +128,7 @@ function DashboardPage() {
           <div className="mt-5 rounded-[1.6rem] border border-white/60 bg-white/72 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Sesión activa</p>
             <p className="mt-3 text-lg font-semibold text-slate-950">{user?.name || "Profesional"}</p>
-              <p className="mt-1 text-sm text-slate-500">{user?.role === "ADMIN" ? "Administración clínica" : "Profesional de atención"}</p>
+              <p className="mt-1 text-sm text-slate-500">Profesional de atención</p>
           </div>
 
           <nav className="mt-5 flex flex-1 flex-col gap-2">
