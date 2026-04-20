@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect } from "react"
+﻿import { createContext, useContext, useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import type { User } from "../types/auth.types"
+import { getMeService } from "../services/auth.service"
 
 interface AuthContextType {
   user: User | null
@@ -8,6 +9,7 @@ interface AuthContextType {
   login: (token: string, user: User) => void
   logout: () => void
   isAuthenticated: boolean
+  authLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -15,23 +17,40 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
 
-  // Al cargar la app, verificar si hay sesión guardada
   useEffect(() => {
     const savedToken = localStorage.getItem("token")
     const savedUser = localStorage.getItem("user")
 
-    if (savedToken && savedUser) {
-      setToken(savedToken)
-      setUser(JSON.parse(savedUser))
+    if (!savedToken || !savedUser) {
+      setAuthLoading(false)
+      return
     }
+
+    const restoreSession = async () => {
+      try {
+        await getMeService()
+        setToken(savedToken)
+        setUser(JSON.parse(savedUser))
+      } catch {
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        setToken(null)
+        setUser(null)
+      } finally {
+        setAuthLoading(false)
+      }
+    }
+
+    void restoreSession()
   }, [])
 
-  const login = (token: string, user: User) => {
-    setToken(token)
-    setUser(user)
-    localStorage.setItem("token", token)
-    localStorage.setItem("user", JSON.stringify(user))
+  const login = (nextToken: string, nextUser: User) => {
+    setToken(nextToken)
+    setUser(nextUser)
+    localStorage.setItem("token", nextToken)
+    localStorage.setItem("user", JSON.stringify(nextUser))
   }
 
   const logout = () => {
@@ -42,13 +61,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      token,
-      login,
-      logout,
-      isAuthenticated: !!token
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        isAuthenticated: !!token,
+        authLoading
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

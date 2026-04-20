@@ -26,6 +26,27 @@ const STATUS_OPTIONS = [
   { value: "cumplido_con_dificultad", label: "Con dificultad", color: "text-amber-600" }
 ]
 
+const getGoalProgressState = (completedOperationalGoals: number, totalOperationalGoals: number) => {
+  if (totalOperationalGoals === 0 || completedOperationalGoals === 0) {
+    return {
+      label: "No cumplido",
+      styles: "bg-slate-100 text-slate-600"
+    }
+  }
+
+  if (completedOperationalGoals === totalOperationalGoals) {
+    return {
+      label: "Cumplido",
+      styles: "bg-emerald-100 text-emerald-700"
+    }
+  }
+
+  return {
+    label: "En progreso",
+    styles: "bg-amber-100 text-amber-700"
+  }
+}
+
 function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSaved, onGoalsUpdated }: Props) {
   const [goals, setGoals] = useState<Goal[]>([])
   const [loading, setLoading] = useState(true)
@@ -177,7 +198,16 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
     if (!editOpDescription.trim()) return
 
     try {
-      const updated = await updateOperationalGoalService(patientId, operationalId, false, undefined, undefined)
+      const currentOperationalGoal = goals
+        .find((goal) => goal.id === goalId)
+        ?.operationalGoals.find((operationalGoal) => operationalGoal.id === operationalId)
+
+      const updated = await updateOperationalGoalService(patientId, operationalId, {
+        description: editOpDescription.trim(),
+        completed: currentOperationalGoal?.completed,
+        status: currentOperationalGoal?.status,
+        notes: currentOperationalGoal?.notes
+      })
       setGoals((current) => current.map((goal) => (
         goal.id !== goalId
           ? goal
@@ -223,7 +253,10 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
   const handleStatusChange = async (goalId: string, operationalId: string, newStatus: string) => {
     try {
       const isCompleted = newStatus !== "no_cumplido"
-      await updateOperationalGoalService(patientId, operationalId, isCompleted, newStatus)
+      await updateOperationalGoalService(patientId, operationalId, {
+        completed: isCompleted,
+        status: newStatus
+      })
 
       setGoals((current) => current.map((goal) => {
         if (goal.id !== goalId) return goal
@@ -250,9 +283,11 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
       await updateOperationalGoalService(
         patientId,
         operationalId,
-        currentStatus !== "no_cumplido",
-        currentStatus,
-        noteText
+        {
+          completed: currentStatus !== "no_cumplido",
+          status: currentStatus,
+          notes: noteText
+        }
       )
 
       setGoals((current) => current.map((goal) => (
@@ -429,7 +464,11 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
             </div>
           ) : (
             <div className="space-y-4">
-              {orderedGoals.map((goal, goalIndex) => (
+              {orderedGoals.map((goal, goalIndex) => {
+                const completedOperationalGoals = goal.operationalGoals.filter((operationalGoal) => operationalGoal.completed).length
+                const goalProgressState = getGoalProgressState(completedOperationalGoals, goal.operationalGoals.length)
+
+                return (
                 <article key={goal.id} className="overflow-hidden rounded-2xl border border-slate-200">
                   <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)]">
                     <div className="border-b border-slate-200 bg-slate-50 p-4 lg:border-b-0 lg:border-r">
@@ -487,10 +526,8 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
                                 {goal.description}
                               </p>
                             </div>
-                            <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                              goal.completed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                            }`}>
-                              {goal.completed ? "Completado" : "En progreso"}
+                            <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${goalProgressState.styles}`}>
+                              {goalProgressState.label}
                             </span>
                           </div>
                           <p className="text-xs text-slate-500">
@@ -718,7 +755,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
                     </div>
                   </div>
                 </article>
-              ))}
+              )})}
             </div>
           )}
         </div>

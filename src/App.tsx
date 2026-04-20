@@ -12,17 +12,26 @@ import AnamnesisPage from "./pages/AnamnesisPage"
 import PreLavadoPage from "./pages/PreLavadoPage"
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, authLoading } = useAuth()
+  if (authLoading) return null
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />
 }
 
 function AppRoutes() {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user, authLoading } = useAuth()
 
   const getHomeRoute = () => {
     if (!isAuthenticated) return "/login"
     if (user?.role === "PATIENT") return "/portal"
     return "/dashboard"
+  }
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 text-sm text-slate-500">
+        Validando sesion...
+      </div>
+    )
   }
 
   return (

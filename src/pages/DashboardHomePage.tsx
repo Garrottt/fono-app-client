@@ -278,8 +278,8 @@ function DashboardHomePage() {
             <section className="grid gap-4 sm:grid-cols-3">
               <div className="flex h-full flex-col rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Acceso rápido</p>
-                <p className="mt-3 text-lg font-semibold text-slate-950">Agendar desde Inicio</p>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-1 text-lg font-semibold text-slate-950">Agendar desde Inicio</p>
+                <p className="mt-1 text-sm text-slate-500">
                   Salta directo al formulario de cita usando la fecha que ya tienes seleccionada.
                 </p>
                 <button
@@ -292,21 +292,21 @@ function DashboardHomePage() {
               </div>
               <div className="flex h-full flex-col rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Próxima acción</p>
-                <p className="mt-3 text-lg font-semibold text-slate-950">Ver pacientes</p>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-1 text-lg font-semibold text-slate-950">Ver pacientes</p>
+                <p className="mt-1 text-sm text-slate-500">
                   Entra rápido al listado para revisar fichas, objetivos y acceso al portal.
                 </p>
                 <button
                   type="button"
                   onClick={() => navigate("/patients")}
-                  className="mt-auto inline-flex w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                  className="mt-auto inline-flex w-fit rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
                   Abrir pacientes
                 </button>
               </div>
               <div className="flex h-full flex-col rounded-[1.7rem] border border-white/70 bg-white/78 p-5 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Vista seleccionada</p>
-                <p className="mt-3 text-lg font-semibold capitalize text-slate-950">{selectedDateLabel}</p>
+                <p className="mt-1 text-lg font-semibold capitalize text-slate-950">{selectedDateLabel}</p>
                 <p className="mt-2 text-sm text-slate-500">{selectedAppointments.length} citas en este día</p>
                 <button
                   type="button"
@@ -314,7 +314,7 @@ function DashboardHomePage() {
                     const calendarSection = document.getElementById("calendar-panel")
                     calendarSection?.scrollIntoView({ behavior: "smooth", block: "start" })
                   }}
-                  className="mt-auto inline-flex w-fit rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-100"
+                  className="mt-auto inline-flex w-fit rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
                   Ver calendario
                 </button>

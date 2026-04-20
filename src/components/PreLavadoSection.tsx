@@ -517,7 +517,6 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
             <ReadOnlyCard label="Paciente" value={patientName} />
             <ReadOnlyCard label="Edad" value={patientAge?.toString() || "No registrada"} />
             <ReadOnlyCard label="Diagnostico" value={patientDiagnosis || "Sin diagnostico"} />
-            <ReadOnlyCard label="Hipotesis" value={derived.diagnosticSummary} />
             <ReadOnlyCard label="Ultima actualizacion" value={formatUpdatedAt(evaluation?.updatedAt)} />
           </div>
         </div>
@@ -560,7 +559,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
         <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
             <h4 className="text-lg font-semibold text-slate-900">Contexto heredado desde anamnesis</h4>
-            <p className="mt-1 text-sm text-slate-500">Estos antecedentes ya vienen desde la anamnesis y se consideran automaticamente en el cierre clinico.</p>
+            <p className="mt-1 text-sm text-slate-500">Estos antecedentes ya vienen desde la anamnesis y se consideran dentro de la evaluacion pre-lavado.</p>
           </div>
 
           {!anamnesis && (
@@ -600,22 +599,6 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
               value={form.dolorAlTocarTrago}
               onChange={(value) => updateField("dolorAlTocarTrago", value)}
             />
-          </div>
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <h4 className="text-lg font-semibold text-slate-900">Cierre clinico</h4>
-            <p className="mt-1 text-sm text-slate-500">Resumen automatico segun los datos cargados durante la evaluacion.</p>
-          </div>
-
-          <div className={`rounded-2xl border px-4 py-4 text-sm font-semibold ${statusClass}`}>
-            {derived.aptoParaLavado ? "Apto para lavado" : "No apto para lavado"}
-          </div>
-
-          <div className="grid gap-4">
-            <ReadOnlyCard label="Hipotesis diagnostica sugerida" value={derived.diagnosticSummary} />
-            <ReadOnlyCard label="Conducta sugerida" value={derived.suggestedConduct} />
           </div>
         </section>
       </div>

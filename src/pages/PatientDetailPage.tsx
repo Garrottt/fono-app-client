@@ -166,7 +166,7 @@ function PatientDetailPage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-lg border border-gray-200 p-4">
-            <p className="mb-1 text-xs text-gray-400">Edad</p>
+            <p className="mb-2 text-sm font-semibold text-slate-700">Edad</p>
             {editingPatientInfo ? (
               <input
                 type="number"
@@ -182,7 +182,7 @@ function PatientDetailPage() {
           </div>
 
           <div className="rounded-lg border border-gray-200 p-4">
-            <p className="mb-1 text-xs text-gray-400">Email</p>
+            <p className="mb-2 text-sm font-semibold text-slate-700">Email</p>
             {editingPatientInfo ? (
               <input
                 type="email"
@@ -197,7 +197,7 @@ function PatientDetailPage() {
           </div>
 
           <div className="rounded-lg border border-gray-200 p-4">
-            <p className="mb-1 text-xs text-gray-400">Telefono</p>
+            <p className="mb-2 text-sm font-semibold text-slate-700">Telefono</p>
             {editingPatientInfo ? (
               <input
                 type="text"
@@ -212,7 +212,7 @@ function PatientDetailPage() {
           </div>
 
           <div className="rounded-lg border border-gray-200 p-4">
-            <p className="mb-1 text-xs text-gray-400">Nombre</p>
+            <p className="mb-2 text-sm font-semibold text-slate-700">Nombre</p>
             {editingPatientInfo ? (
               <input
                 type="text"
@@ -227,7 +227,7 @@ function PatientDetailPage() {
           </div>
 
           <div className="rounded-lg border border-gray-200 p-4 xl:col-span-1 md:col-span-2">
-            <p className="mb-1 text-xs text-gray-400">Diagnostico</p>
+            <p className="mb-2 text-sm font-semibold text-slate-700">Diagnostico</p>
             {editingPatientInfo ? (
               <textarea
                 value={diagnosisText}

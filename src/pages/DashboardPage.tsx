@@ -142,13 +142,6 @@ function DashboardPage() {
               </NavLink>
             ))}
           </nav>
-
-          <div className="mt-5 rounded-[1.6rem] bg-gradient-to-br from-teal-600 via-teal-700 to-slate-900 p-5 text-white shadow-[0_24px_44px_rgba(15,118,110,0.22)]">
-            <p className="text-sm font-semibold">Experiencia mobile-first</p>
-            <p className="mt-2 text-sm leading-6 text-white/75">
-              Cada módulo prioriza tareas rápidas, foco clínico y lectura clara desde teléfono o tablet.
-            </p>
-          </div>
         </aside>
 
         <aside
@@ -247,7 +240,9 @@ function DashboardPage() {
             </header>
 
             <main className="flex-1 overflow-auto px-2 pb-4 pt-2 sm:px-3 lg:px-4">
-              <Outlet />
+              <div key={location.pathname} className="fono-page-transition">
+                <Outlet />
+              </div>
             </main>
           </div>
         </div>
@@ -268,4 +263,3 @@ function DashboardPage() {
 }
 
 export default DashboardPage
-

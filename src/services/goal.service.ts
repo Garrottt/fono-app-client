@@ -40,13 +40,17 @@ export const createOperationalGoalService = async (
 export const updateOperationalGoalService = async (
   patientId: string,
   operationalId: string,
-  completed: boolean,
-  status?: string,
-  notes?: string
+  data: {
+    description?: string
+    completed?: boolean
+    status?: string
+    notes?: string
+    order?: number
+  }
 ): Promise<OperationalGoal> => {
   const response = await axios.put(
     `${API_URL}/patients/${patientId}/goals/operational/${operationalId}`,
-    { completed, status, notes },
+    data,
     { headers: getAuthHeaders() }
   )
   return response.data.operationalGoal
