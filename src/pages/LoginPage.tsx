@@ -1,24 +1,29 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import AppBrand from "../components/AppBrand"
 import anaSolLoginImage from "../assets/ana-sol-login.webp"
 import { useAuth } from "../context/authContext"
 import { loginService } from "../services/auth.service"
 
 const CERTIFICATIONS = [
-  "Licenciada en Fonoaudiología · Universidad Andrés Bello",
-  "Curso Lavado de oídos · Safoin",
-  "Curso internacional en metodologías de investigación aplicadas a la Fonoaudiología · Universidad Europea de Madrid",
-  "Curso internacional en gestión y emprendimiento en Fonoaudiología · Universidad Europea de Madrid"
+  "Licenciada en Fonoaudiologia · Universidad Andres Bello",
+  "Curso Lavado de oidos · OTEC ACADEMY",
+  "Curso IAAS · Perfecciona Capacitacion en Salud",
+  "Curso internacional en metodologias de investigacion aplicadas a la Fonoaudiologia · Universidad Europea de Madrid",
+  "Curso internacional en gestion y emprendimiento en Fonoaudiologia · Universidad Europea de Madrid"
 ]
 
 const QUICK_POINTS = [
-  "Seguimiento de pacientes y evolución clínica",
-  "Objetivos terapéuticos y sesiones de intervención",
+  "Seguimiento de pacientes y evolucion clinica",
+  "Objetivos terapeuticos y sesiones de intervencion",
   "Agenda diaria y continuidad del proceso"
 ]
 
-function LoginPage() {
+type LoginPageProps = {
+  mode?: "professional" | "patient"
+}
+
+function LoginPage({ mode = "professional" }: LoginPageProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -26,6 +31,37 @@ function LoginPage() {
 
   const { login } = useAuth()
   const navigate = useNavigate()
+  const isPatientMode = mode === "patient"
+
+  const pageCopy = isPatientMode
+    ? {
+        eyebrow: "Portal de pacientes",
+        title: "Acceso a tu espacio personal",
+        description:
+          "Ingresa con tu correo y contrasena para revisar tus tareas, archivos y seguimiento indicado por tu fonoaudiologa.",
+        profileTitle: "Acceso paciente",
+        profileSubtitle: "Portal privado · Seguimiento terapeutico",
+        buttonLabel: "Entrar al portal",
+        emailPlaceholder: "tu correo registrado",
+        alternateLabel: "Eres profesional?",
+        alternateCta: "Ir al panel clinico",
+        alternateHref: "/login",
+        errorMessage: "No pudimos validar tu acceso como paciente"
+      }
+    : {
+        eyebrow: "Inicio de sesion",
+        title: "Acceso al panel clinico",
+        description:
+          "Ingresa con tu correo y contrasena para continuar tu jornada clinica y retomar el trabajo con cada paciente.",
+        profileTitle: "Perfil activo",
+        profileSubtitle: "Fonoaudiologa · Acceso privado",
+        buttonLabel: "Entrar al panel",
+        emailPlaceholder: "tu@centroclinico.com",
+        alternateLabel: "Eres paciente?",
+        alternateCta: "Ir a tu portal",
+        alternateHref: "/portal/login",
+        errorMessage: "Email o contrasena incorrectos"
+      }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,9 +71,9 @@ function LoginPage() {
     try {
       const data = await loginService({ email, password })
       login(data.token, data.user)
-      navigate("/dashboard")
+      navigate(data.user.role === "PATIENT" ? "/portal" : "/dashboard")
     } catch {
-      setError("Email o contraseña incorrectos")
+      setError(pageCopy.errorMessage)
     } finally {
       setLoading(false)
     }
@@ -59,7 +95,7 @@ function LoginPage() {
           <div className="relative mx-auto grid w-full max-w-7xl gap-8 xl:grid-cols-[1.05fr_0.95fr] xl:items-center">
             <div className="max-w-2xl text-white">
               <div className="inline-flex items-center rounded-full border border-white/14 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white/72">
-                Consulta fonoaudiológica
+                Consulta fonoaudiologica
               </div>
 
               <div className="mt-6">
@@ -70,14 +106,12 @@ function LoginPage() {
                 Espacio profesional personalizado
               </p>
               <h1 className="fono-title mt-4 max-w-xl text-4xl font-semibold leading-tight text-white sm:text-5xl xl:text-6xl">
-                Ana Sol Munizaga Saldaño
+                Ana Sol Munizaga Saldano
               </h1>
-              <p className="mt-4 text-lg font-medium text-teal-100/92 sm:text-xl">
-                Fonoaudióloga
-              </p>
+              <p className="mt-4 text-lg font-medium text-teal-100/92 sm:text-xl">Fonoaudiologa</p>
               <p className="mt-6 max-w-2xl text-base leading-8 text-white/78 sm:text-lg">
-                Un acceso clínico pensado para revisar pacientes, ordenar objetivos terapéuticos,
-                planificar sesiones y sostener una experiencia de atención más clara y profesional.
+                Un acceso clinico pensado para revisar pacientes, ordenar objetivos terapeuticos,
+                planificar sesiones y sostener una experiencia de atencion mas clara y profesional.
               </p>
 
               <div className="mt-8 grid gap-3">
@@ -96,14 +130,14 @@ function LoginPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
-                      Formación y certificaciones
+                      Formacion y certificaciones
                     </p>
                     <h2 className="mt-2 text-2xl font-semibold text-white">
-                      Presentación profesional
+                      Presentacion profesional
                     </h2>
                   </div>
                   <p className="max-w-md text-sm leading-6 text-white/68">
-                    Una bienvenida más personal, más confiable y más coherente con la consulta.
+                    Una bienvenida mas personal, mas confiable y mas coherente con la consulta.
                   </p>
                 </div>
 
@@ -130,15 +164,15 @@ function LoginPage() {
                 <div className="absolute inset-x-10 top-6 h-24 rounded-full bg-white/10 blur-3xl" />
                 <img
                   src={anaSolLoginImage}
-                  alt="Retrato ilustrado de Ana Sol Munizaga Saldaño"
+                  alt="Retrato ilustrado de Ana Sol Munizaga Saldano"
                   className="relative h-[420px] w-full rounded-[1.8rem] object-contain object-top sm:h-[560px] xl:h-[680px]"
                 />
                 <div className="relative mt-5 rounded-[1.4rem] border border-white/10 bg-slate-950/35 px-5 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
-                    Perfil clínico
+                    Perfil clinico
                   </p>
                   <p className="mt-2 text-sm leading-6 text-white/92 sm:text-base">
-                    Atención terapéutica enfocada en continuidad, seguimiento y objetivos de intervención.
+                    Atencion terapeutica enfocada en continuidad, seguimiento y objetivos de intervencion.
                   </p>
                 </div>
               </div>
@@ -157,51 +191,48 @@ function LoginPage() {
 
               <div className="mt-6 lg:mt-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Inicio de sesión
+                  {pageCopy.eyebrow}
                 </p>
                 <h2 className="fono-title mt-3 text-3xl font-semibold text-slate-950">
-                  Acceso al panel clínico
+                  {pageCopy.title}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-500">
-                  Ingresa con tu correo y contraseña para continuar tu jornada clínica y retomar el
-                  trabajo con cada paciente.
-                </p>
+                <p className="mt-3 text-sm leading-7 text-slate-500">{pageCopy.description}</p>
               </div>
 
               <div className="mt-6 rounded-[1.4rem] border border-slate-200 bg-slate-50/85 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  Perfil activo
+                  {pageCopy.profileTitle}
                 </p>
                 <p className="mt-2 text-base font-semibold text-slate-900">
-                  Ana Sol Munizaga Saldaño
+                  Ana Sol Munizaga Saldano
                 </p>
-                <p className="mt-1 text-sm text-slate-500">Fonoaudióloga · Acceso privado</p>
+                <p className="mt-1 text-sm text-slate-500">{pageCopy.profileSubtitle}</p>
               </div>
 
               <form onSubmit={handleSubmit} className="mt-8 space-y-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Correo electrónico</label>
+                  <label className="text-sm font-semibold text-slate-700">Correo electronico</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
-                    placeholder="tu@centroclinico.com"
+                    placeholder={pageCopy.emailPlaceholder}
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
-                    <label className="text-sm font-semibold text-slate-700">Contraseña</label>
-                    <span className="text-xs font-medium text-slate-400">Sesión segura</span>
+                    <label className="text-sm font-semibold text-slate-700">Contrasena</label>
+                    <span className="text-xs font-medium text-slate-400">Sesion segura</span>
                   </div>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
-                    placeholder="Ingresa tu contraseña"
+                    placeholder="Ingresa tu contrasena"
                     required
                   />
                 </div>
@@ -217,17 +248,31 @@ function LoginPage() {
                   disabled={loading}
                   className="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-4 py-3.5 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,23,42,0.16)] transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading ? "Ingresando..." : "Entrar al panel"}
+                  {loading ? "Ingresando..." : pageCopy.buttonLabel}
                 </button>
               </form>
 
-              <div className="mt-8 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  Recomendación
+              <div className="mt-6 rounded-[1.4rem] border border-teal-100 bg-teal-50/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-700">
+                  {pageCopy.alternateLabel}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Si el acceso falla después de una sesión anterior, vuelve a ingresar para renovar tu
-                  sesión local de trabajo.
+                  Usa el acceso correspondiente para entrar al espacio correcto y evitar confusiones de sesion.
+                </p>
+                <Link
+                  to={pageCopy.alternateHref}
+                  className="mt-4 inline-flex items-center rounded-full border border-teal-200 bg-white px-4 py-2 text-sm font-semibold text-teal-800 transition hover:border-teal-300 hover:bg-teal-100"
+                >
+                  {pageCopy.alternateCta}
+                </Link>
+              </div>
+
+              <div className="mt-8 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Recomendacion
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Si el acceso falla despues de una sesion anterior, vuelve a ingresar para renovar tu sesion local de trabajo.
                 </p>
               </div>
             </div>

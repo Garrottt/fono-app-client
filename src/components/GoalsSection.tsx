@@ -331,7 +331,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
         <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-400">Plan terapeutico</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-400">Plan terapéutico</p>
               <h3 className="mt-1 text-xl font-semibold text-slate-900">Objetivos</h3>
               <p className="mt-1 max-w-3xl text-sm text-slate-500">
                 Este bloque queda debajo del acceso al portal y organiza el objetivo general vigente con sus
@@ -393,7 +393,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
                 ) : (
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <p className="text-sm leading-relaxed text-slate-700">
-                      {currentGeneralObjective?.trim() || "Aun no hay objetivo general registrado. Comienza cargandolo aqui."}
+                      {currentGeneralObjective?.trim() || "Aún no hay objetivo general registrado. Comienza cargándolo aquí."}
                     </p>
                     <button
                       type="button"

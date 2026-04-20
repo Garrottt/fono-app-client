@@ -203,7 +203,7 @@ function DashboardHomePage() {
                 <p className="mt-1 text-xs text-white/60">{monthAppointmentsCount} citas visibles</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 backdrop-blur">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">Dia seleccionado</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">Día seleccionado</p>
                 <p className="mt-2 text-base font-semibold text-white">
                   {new Date(`${selectedDate}T12:00:00`).toLocaleDateString("es-CL", {
                     day: "2-digit",

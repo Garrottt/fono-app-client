@@ -731,10 +731,10 @@ const renderSessionForm = (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                Tareas e indicaciónes de la sesión
+                Tareas e indicaciones de la sesión
               </h4>
               <p className="mt-1 text-xs text-slate-500">
-                Opcional. Agrega indicaciónes solo cuando corresponda.
+                Opcional. Agrega indicaciones solo cuando corresponda.
               </p>
             </div>
             <button
@@ -753,7 +753,7 @@ const renderSessionForm = (
           {form.sessionTasks.length === 0 && (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-6 text-center">
               <p className="text-sm text-slate-500">
-                No hay tareas ni indicaciónes cargadas en esta sesión.
+                No hay tareas ni indicaciones cargadas en esta sesión.
               </p>
             </div>
           )}
@@ -885,7 +885,7 @@ const renderSessionForm = (
           <h3 className="mt-2 text-xl font-semibold">Sesiones de intervención</h3>
           <p className="mt-1 max-w-3xl text-sm text-slate-300">
             Cada sesión integra jerarquización, objetivo general, objetivos específicos, objetivos operacionales
-            e indicaciónes en una sola ficha.
+            e indicaciones en una sola ficha.
           </p>
         </div>
         <button
@@ -932,7 +932,7 @@ const renderSessionForm = (
 
       {orderedSessions.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
-          <p className="text-sm text-slate-500">Aún no hay sesiónes registradas para este paciente.</p>
+          <p className="text-sm text-slate-500">Aún no hay sesiones registradas para este paciente.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -1086,12 +1086,12 @@ const renderSessionForm = (
                         <section className="rounded-2xl border border-slate-200">
                           <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
                             <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                              Tareas e indicaciónes
+                              Tareas e indicaciones
                             </h4>
                           </div>
                           <div className="space-y-3 p-4">
                             {session.sessionTasks.length === 0 ? (
-                              <p className="text-sm text-slate-500">No hay indicaciónes registradas para esta sesión.</p>
+                              <p className="text-sm text-slate-500">No hay indicaciones registradas para esta sesión.</p>
                             ) : session.sessionTasks.map((sessionTask, taskIndex) => (
                               <div key={sessionTask.id} className="rounded-2xl border border-slate-200 p-4">
                                 <p className="text-sm font-semibold text-slate-800">

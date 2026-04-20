@@ -40,6 +40,10 @@ function AppRoutes() {
         path="/login"
         element={isAuthenticated ? <Navigate to={getHomeRoute()} /> : <LoginPage />}
       />
+      <Route
+        path="/portal/login"
+        element={isAuthenticated ? <Navigate to={getHomeRoute()} /> : <LoginPage mode="patient" />}
+      />
       <Route path="/portal/set-password" element={<PasswordSetupPage />} />
 
       <Route
