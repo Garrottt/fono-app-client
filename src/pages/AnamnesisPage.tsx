@@ -1,9 +1,9 @@
-﻿import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import AnamnesisSection from "../components/AnamnesisSection"
 import ClinicalModuleLayout from "../components/ClinicalModuleLayout"
 import { getPatientsService } from "../services/patient.service"
 import type { Patient } from "../types/patient.types"
-import { useSearchParams } from "react-router-dom"
 
 function AnamnesisPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -80,10 +80,11 @@ function AnamnesisPage() {
         <section className="rounded-[1.8rem] border border-white/70 bg-gradient-to-br from-slate-950 via-slate-900 to-teal-800 px-5 py-6 text-white shadow-[0_22px_46px_rgba(15,23,42,0.18)] sm:px-6">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(220px,0.8fr)] lg:items-end">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">Modulo clínico</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">Módulo clínico</p>
               <h2 className="fono-title mt-3 text-3xl font-semibold">Antecedentes y red flags en una sola vista</h2>
               <p className="mt-3 text-sm leading-7 text-white/72">
-                Esta interfaz pone primero los datos que afectan la decisión clínica y deja la edición completa un poco más abajo, para que el flujo sea más intuitivo.
+                Esta interfaz pone primero los datos que afectan la decisión clínica y deja la edición
+                completa un poco más abajo, para que el flujo sea más intuitivo.
               </p>
             </div>
 
@@ -116,4 +117,3 @@ function AnamnesisPage() {
 }
 
 export default AnamnesisPage
-

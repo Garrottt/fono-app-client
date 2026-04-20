@@ -69,9 +69,9 @@ function CalendarIcon() {
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Inicio", icon: <HomeIcon />, hint: "Resumen de agenda y actividad" },
-  { to: "/patients", label: "Pacientes", icon: <PatientsIcon />, hint: "Ficha base y acceso rapido" },
+  { to: "/patients", label: "Pacientes", icon: <PatientsIcon />, hint: "Ficha base y acceso rápido" },
   { to: "/anamnesis", label: "Anamnesis", icon: <ClipboardIcon />, hint: "Antecedentes y alertas" },
-  { to: "/pre-lavado", label: "Pre-Lavado", icon: <CheckNoteIcon />, hint: "Evaluacion y aptitud" },
+  { to: "/pre-lavado", label: "Pre-Lavado", icon: <CheckNoteIcon />, hint: "Evaluación y aptitud" },
   { to: "/appointments", label: "Citas", icon: <CalendarIcon />, hint: "Calendario y recordatorios" }
 ]
 
@@ -112,7 +112,7 @@ function DashboardPage() {
           type="button"
           className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-[2px] lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
-          aria-label="Cerrar menu"
+          aria-label="Cerrar menú"
         />
       )}
 
@@ -126,9 +126,9 @@ function DashboardPage() {
           </div>
 
           <div className="mt-5 rounded-[1.6rem] border border-white/60 bg-white/72 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Sesion activa</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Sesión activa</p>
             <p className="mt-3 text-lg font-semibold text-slate-950">{user?.name || "Profesional"}</p>
-            <p className="mt-1 text-sm text-slate-500">{user?.role === "ADMIN" ? "Administracion clinica" : "Profesional de atencion"}</p>
+              <p className="mt-1 text-sm text-slate-500">{user?.role === "ADMIN" ? "Administración clínica" : "Profesional de atención"}</p>
           </div>
 
           <nav className="mt-5 flex flex-1 flex-col gap-2">
@@ -182,7 +182,7 @@ function DashboardPage() {
             onClick={handleLogout}
             className="mt-4 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white"
           >
-            Cerrar sesion
+            Cerrar sesión
           </button>
         </aside>
 
@@ -195,14 +195,14 @@ function DashboardPage() {
                     type="button"
                     onClick={() => setMobileMenuOpen(true)}
                     className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm lg:hidden"
-                    aria-label="Abrir menu"
+                    aria-label="Abrir menú"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
                       <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
                     </svg>
                   </button>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Modulo activo</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Módulo activo</p>
                     <div className="mt-1 flex flex-wrap items-center gap-3">
                       <h1 className="fono-title text-2xl font-semibold text-slate-950 sm:text-[2rem]">
                         {currentSection.label}
@@ -233,7 +233,7 @@ function DashboardPage() {
                     onClick={handleLogout}
                     className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
                   >
-                    Cerrar sesion
+                    Cerrar sesión
                   </button>
                 </div>
               </div>

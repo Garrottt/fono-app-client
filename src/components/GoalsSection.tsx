@@ -113,7 +113,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
       onGoalsUpdated?.()
       resetGoalForm()
     } catch (err) {
-      setError("Error al crear el objetivo especifico")
+      setError("Error al crear el objetivo específico")
     } finally {
       setSaving(false)
     }
@@ -151,12 +151,12 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
       onGoalsUpdated?.()
       setEditingGoalId(null)
     } catch (err) {
-      setError("Error al actualizar el objetivo especifico")
+      setError("Error al actualizar el objetivo específico")
     }
   }
 
   const handleDeleteGoal = async (goalId: string) => {
-    if (!window.confirm("Esta accion eliminara el objetivo especifico y todos sus objetivos operacionales. Continuar?")) {
+    if (!window.confirm("Esta accion eliminara el objetivo específico y todos sus objetivos operacionales. Continuar?")) {
       return
     }
 
@@ -165,7 +165,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
       setGoals((current) => current.filter((goal) => goal.id !== goalId))
       onGoalsUpdated?.()
     } catch (err) {
-      setError("Error al eliminar el objetivo especifico")
+      setError("Error al eliminar el objetivo específico")
     }
   }
 
@@ -335,7 +335,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
               <h3 className="mt-1 text-xl font-semibold text-slate-900">Objetivos</h3>
               <p className="mt-1 max-w-3xl text-sm text-slate-500">
                 Este bloque queda debajo del acceso al portal y organiza el objetivo general vigente con sus
-                objetivos especificos y operacionales.
+                objetivos específicos y operacionales.
               </p>
             </div>
             <button
@@ -411,7 +411,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
           {showGoalForm && (
             <form onSubmit={handleCreateGoal} className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5">
               <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500">Nuevo objetivo especifico</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500">Nuevo objetivo específico</p>
                 <h4 className="mt-1 text-base font-semibold text-slate-800">Agregar O.E. con sus fechas</h4>
               </div>
 
@@ -420,7 +420,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   className="min-h-28 w-full rounded-xl border border-indigo-100 bg-white px-3 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Describe el objetivo especifico."
+                  placeholder="Describe el objetivo específico."
                   required
                 />
                 <input
@@ -460,7 +460,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
 
           {orderedGoals.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
-              <p className="text-sm text-slate-500">Todavia no hay objetivos especificos registrados.</p>
+              <p className="text-sm text-slate-500">Todavía no hay objetivos específicos registrados.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -563,7 +563,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
                         <div>
                           <p className="text-sm font-semibold text-slate-800">Objetivos operacionales</p>
                           <p className="mt-1 text-xs text-slate-500">
-                            Cada O.O. queda disponible para usarlo luego en la planificacion de sesiones.
+                            Cada O.O. queda disponible para usarlo luego en la planificación de sesiones.
                           </p>
                         </div>
                         <button
@@ -619,7 +619,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
 
                       {goal.operationalGoals.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center">
-                          <p className="text-sm text-slate-500">Este objetivo especifico aun no tiene O.O. asociados.</p>
+                          <p className="text-sm text-slate-500">Este objetivo específico aún no tiene O.O. asociados.</p>
                         </div>
                       ) : (
                         <div className="space-y-3">

@@ -56,7 +56,7 @@ function PatientDetailPage() {
       setDiagnosisText(found.diagnosis || "")
       setPortalEmail(found.user?.email || found.email || "")
       setSessions(sessionData)
-    } catch (err) {
+    } catch {
       setError("Error al cargar los datos")
     } finally {
       setLoading(false)
@@ -79,7 +79,7 @@ function PatientDetailPage() {
       setPatient(updated)
       setPortalEmail(updated.user?.email || updated.email || "")
       setEditingPatientInfo(false)
-    } catch (err) {
+    } catch {
       setError("Error al actualizar los datos del paciente")
     } finally {
       setPatientInfoSaving(false)
@@ -173,11 +173,11 @@ function PatientDetailPage() {
                 min="0"
                 value={patientAge}
                 onChange={(e) => setPatientAge(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Ej: 8"
               />
             ) : (
-              <p className="text-sm text-gray-700">{patient?.age ?? "—"}</p>
+              <p className="text-sm text-gray-700">{patient?.age ?? "-"}</p>
             )}
           </div>
 
@@ -188,26 +188,26 @@ function PatientDetailPage() {
                 type="email"
                 value={patientEmail}
                 onChange={(e) => setPatientEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="correo@ejemplo.com"
               />
             ) : (
-              <p className="break-words text-sm text-gray-700">{patient?.email || "—"}</p>
+              <p className="break-words text-sm text-gray-700">{patient?.email || "-"}</p>
             )}
           </div>
 
           <div className="rounded-lg border border-gray-200 p-4">
-            <p className="mb-2 text-sm font-semibold text-slate-700">Telefono</p>
+            <p className="mb-2 text-sm font-semibold text-slate-700">Teléfono</p>
             {editingPatientInfo ? (
               <input
                 type="text"
                 value={patientPhone}
                 onChange={(e) => setPatientPhone(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="+56 9 ..."
               />
             ) : (
-              <p className="text-sm text-gray-700">{patient?.phone || "—"}</p>
+              <p className="text-sm text-gray-700">{patient?.phone || "-"}</p>
             )}
           </div>
 
@@ -218,7 +218,7 @@ function PatientDetailPage() {
                 type="text"
                 value={patientName}
                 onChange={(e) => setPatientName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Nombre del paciente"
               />
             ) : (
@@ -227,18 +227,18 @@ function PatientDetailPage() {
           </div>
 
           <div className="rounded-lg border border-gray-200 p-4 xl:col-span-1 md:col-span-2">
-            <p className="mb-2 text-sm font-semibold text-slate-700">Diagnostico</p>
+            <p className="mb-2 text-sm font-semibold text-slate-700">Diagnóstico</p>
             {editingPatientInfo ? (
               <textarea
                 value={diagnosisText}
                 onChange={(e) => setDiagnosisText(e.target.value)}
-                className="w-full resize-none border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full resize-none rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 rows={3}
                 placeholder="Ej: Dislalia funcional, retraso en el lenguaje..."
               />
             ) : (
               <p className="text-sm text-gray-700">
-                {patient?.diagnosis || <span className="italic text-gray-400">Sin diagnostico</span>}
+                {patient?.diagnosis || <span className="italic text-gray-400">Sin diagnóstico</span>}
               </p>
             )}
           </div>
@@ -251,7 +251,7 @@ function PatientDetailPage() {
           <p className="mt-1 text-sm text-gray-500">
             {patient?.user?.email
               ? `Acceso activo con ${patient.user.email}`
-              : "Este paciente todavia no tiene credenciales para iniciar sesion en el portal."}
+              : "Este paciente todavía no tiene credenciales para iniciar sesión en el portal."}
           </p>
         </div>
 
@@ -262,20 +262,20 @@ function PatientDetailPage() {
               type="email"
               value={portalEmail}
               onChange={(e) => setPortalEmail(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="paciente@correo.com"
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">
-              {patient?.user ? "Nueva contrasena" : "Contrasena inicial"}
+              {patient?.user ? "Nueva contraseña" : "Contraseña inicial"}
             </label>
             <input
               type="password"
               value={portalPassword}
               onChange={(e) => setPortalPassword(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Minimo recomendable: 8 caracteres"
+              className="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Mínimo recomendable: 8 caracteres"
             />
           </div>
         </div>

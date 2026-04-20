@@ -32,7 +32,7 @@ const STATUS_OPTIONS: Array<{ value: StructureStatus; label: string }> = [
 const PABELLON_OPTIONS: Array<{ value: PabellonObservation; label: string }> = [
   { value: "normal", label: "Normal" },
   { value: "inflamado", label: "Inflamado" },
-  { value: "malformacion", label: "Malformacion" }
+  { value: "malformacion", label: "Malformación" }
 ]
 
 const CAE_OPTIONS: Array<{ value: CaeObservation; label: string }> = [
@@ -43,7 +43,7 @@ const CAE_OPTIONS: Array<{ value: CaeObservation; label: string }> = [
 ]
 
 const MEMBRANA_OPTIONS: Array<{ value: MembranaObservation; label: string }> = [
-  { value: "integra", label: "Integra" },
+  { value: "integra", label: "Íntegra" },
   { value: "perforada", label: "Perforada" },
   { value: "abombada", label: "Abombada" },
   { value: "retraida", label: "Retraida" }
@@ -95,11 +95,11 @@ const computeLiveResult = (form: UpdatePreLavadoInput) => {
     form.oiCaeObservacion === "presencia_hongos"
 
   if (form.hasPreviousEarSurgeries) {
-    criticalBlocks.push("Cirugias previas detectadas. No apto para lavado por riesgo clinico y legal.")
+    criticalBlocks.push("Cirugías previas detectadas. No apto para lavado por riesgo clínico y legal.")
   }
 
   if (form.hasDiabetesOrImmunosuppression) {
-    criticalBlocks.push("Diabetes o inmunosupresion detectada. No apto para lavado por riesgo de otitis externa maligna.")
+    criticalBlocks.push("Diabetes o inmunosupresión detectada. No apto para lavado por riesgo de otitis externa maligna.")
   }
 
   if (form.hasKnownPerforation || hasMembranePerforation) {
@@ -107,11 +107,11 @@ const computeLiveResult = (form: UpdatePreLavadoInput) => {
   }
 
   if (form.otorrea) {
-    precautionAlerts.push("ALERTA: Presencia de secrecion. Evaluar consistencia y olor. Si es purulenta, evitar irrigacion.")
+    precautionAlerts.push("ALERTA: Presencia de secreción. Evaluar consistencia y olor. Sí es purulenta, evitar irrigación.")
   }
 
   if (form.prurito) {
-    precautionAlerts.push("ALERTA: Picazon intensa detectada. Posible otomicosis. Si se confirman hongos en otoscopia, derivar y no irrigar.")
+    precautionAlerts.push("ALERTA: Picazon intensa detectada. Posible otomicosis. Sí se confirman hongos en otoscopía, derivar y no irrigar.")
   }
 
   if (form.otorragia) {
@@ -119,21 +119,21 @@ const computeLiveResult = (form: UpdatePreLavadoInput) => {
   }
 
   if (form.usesHearingAid && form.hearingAidBadSmell) {
-    precautionAlerts.push("ALERTA: Mal olor asociado al uso de audifonos. Evaluar posible proceso infeccioso antes del lavado.")
+    precautionAlerts.push("ALERTA: Mal olor asociado al uso de audífonos. Evaluar posible proceso infeccioso antes del lavado.")
   }
 
-  let diagnosticSummary = "Sin hipotesis automatica concluyente"
-  let suggestedConduct = "Continuar evaluacion clinica y confirmar conducta profesional segun hallazgos."
+  let diagnosticSummary = "Sín hipótesis automática concluyente"
+  let suggestedConduct = "Continuar evaluación clinica y confirmar conducta profesional según hallazgos."
 
   if ((form.prurito && form.otorrea) || hasFungi) {
     diagnosticSummary = "Sospecha de Otomicosis"
     suggestedConduct = "Se recomienda DERIVAR. Evitar humedad en el conducto."
   } else if (form.otalgia && form.dolorAlTocarTrago) {
-    diagnosticSummary = "Signos de Otitis Externa"
+    diagnosticSummary = "Sígnos de Otitis Externa"
     suggestedConduct = "Evaluar tratamiento medico antes de limpieza."
   } else if (form.hipoacusia && form.plenitudOtica && !form.otalgia) {
     diagnosticSummary = "Compatible con Tapon de Cerumen"
-    suggestedConduct = "Proceder a otoscopia para confirmar extraccion."
+    suggestedConduct = "Proceder a otoscopía para confirmar extracción."
   }
 
   return {
@@ -169,7 +169,7 @@ function BinaryField({
             onClick={() => onChange(true)}
             className={`min-w-[58px] rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${value ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-white"}`}
           >
-            Si
+            Sí
           </button>
           <button
             type="button"
@@ -334,7 +334,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
           setSavedForm(EMPTY_FORM)
         }
       } catch {
-        setError("Error al cargar la evaluacion pre-lavado")
+        setError("Error al cargar la evaluación pre-lavado")
       } finally {
         setLoading(false)
       }
@@ -379,13 +379,13 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
 
       alerts.push(
         surgeries.length > 0
-          ? `Advertencia desde anamnesis: cirugias de oido previas registradas (${surgeries.join(", ")}).`
-          : "Advertencia desde anamnesis: se registraron cirugias de oido previas."
+          ? `Advertencia desde anamnesis: cirugías de oído previas registradas (${surgeries.join(", ")}).`
+          : "Advertencia desde anamnesis: se registraron cirugías de oído previas."
       )
     }
 
     if (anamnesis.hasDiabetesOrImmunosuppression) {
-      alerts.push("Advertencia desde anamnesis: antecedente de diabetes o inmunosupresion.")
+      alerts.push("Advertencia desde anamnesis: antecedente de diabetes o inmunosupresión.")
     }
 
     if (anamnesis.otorrea) {
@@ -422,7 +422,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
       setSavedForm(form)
       setMessage(response.message)
     } catch (saveError: any) {
-      setError(saveError?.response?.data?.message || "Error al guardar la evaluacion pre-lavado")
+      setError(saveError?.response?.data?.message || "Error al guardar la evaluación pre-lavado")
     } finally {
       setSaving(false)
     }
@@ -448,7 +448,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
   }
 
   const formatUpdatedAt = (value?: string) => {
-    if (!value) return "Sin registros previos"
+    if (!value) return "Sín registros previos"
 
     return new Date(value).toLocaleString("es-CL", {
       year: "numeric",
@@ -461,7 +461,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-400">Cargando evaluacion pre-lavado...</p>
+    return <p className="text-sm text-slate-400">Cargando evaluación pre-lavado...</p>
   }
 
   return (
@@ -474,7 +474,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-400">Pre-Lavado</p>
                 <h3 className="mt-2 text-2xl font-semibold text-slate-900">{patientName}</h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  Evaluacion otoscopica pre-lavado para soporte clinico durante la consulta.
+                  Evaluación otoscópica pre-lavado para soporte clínico durante la consulta.
                 </p>
               </div>
 
@@ -508,7 +508,7 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
                 disabled={saving}
                 className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
               >
-                {saving ? "Guardando..." : "Guardar evaluacion"}
+                {saving ? "Guardando..." : "Guardar evaluación"}
               </button>
             </div>
           </div>
@@ -516,8 +516,8 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
           <div className="grid gap-3 px-5 py-4 md:grid-cols-2 xl:grid-cols-5">
             <ReadOnlyCard label="Paciente" value={patientName} />
             <ReadOnlyCard label="Edad" value={patientAge?.toString() || "No registrada"} />
-            <ReadOnlyCard label="Diagnostico" value={patientDiagnosis || "Sin diagnostico"} />
-            <ReadOnlyCard label="Ultima actualizacion" value={formatUpdatedAt(evaluation?.updatedAt)} />
+            <ReadOnlyCard label="Diagnóstico" value={patientDiagnosis || "Sín diagnóstico"} />
+            <ReadOnlyCard label="Última actualización" value={formatUpdatedAt(evaluation?.updatedAt)} />
           </div>
         </div>
       </div>
@@ -559,33 +559,33 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
         <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
             <h4 className="text-lg font-semibold text-slate-900">Contexto heredado desde anamnesis</h4>
-            <p className="mt-1 text-sm text-slate-500">Estos antecedentes ya vienen desde la anamnesis y se consideran dentro de la evaluacion pre-lavado.</p>
+            <p className="mt-1 text-sm text-slate-500">Estos antecedentes ya vienen desde la anamnesis y se consideran dentro de la evaluación pre-lavado.</p>
           </div>
 
           {!anamnesis && (
             <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              Este paciente aun no tiene anamnesis registrada. El pre-lavado seguira funcionando, pero sin antecedentes clinicos heredados.
+              Este paciente aún no tiene anamnesis registrada. El pre-lavado seguirá funcionando, pero sin antecedentes clínicos heredados.
             </div>
           )}
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            <ReadOnlyCard label="Diabetes / inmunosupresion" value={inheritedContext.hasDiabetesOrImmunosuppression ? "Si" : "No"} />
-            <ReadOnlyCard label="Cirugias previas" value={inheritedContext.hasPreviousEarSurgeries ? "Si" : "No"} />
-            <ReadOnlyCard label="Uso de audifonos" value={inheritedContext.usesHearingAid ? "Si" : "No"} />
-            <ReadOnlyCard label="Otalgia" value={inheritedContext.otalgia ? "Si" : "No"} />
-            <ReadOnlyCard label="Hipoacusia" value={inheritedContext.hipoacusia ? "Si" : "No"} />
-            <ReadOnlyCard label="Plenitud otica" value={inheritedContext.plenitudOtica ? "Si" : "No"} />
-            <ReadOnlyCard label="Otorrea" value={inheritedContext.otorrea ? "Si" : "No"} />
-            <ReadOnlyCard label="Prurito" value={inheritedContext.prurito ? "Si" : "No"} />
-            <ReadOnlyCard label="Otorragia" value={inheritedContext.otorragia ? "Si" : "No"} />
-            <ReadOnlyCard label="Mal olor con audifonos" value={inheritedContext.hearingAidBadSmell ? "Si" : "No"} />
+            <ReadOnlyCard label="Diabetes / inmunosupresión" value={inheritedContext.hasDiabetesOrImmunosuppression ? "Sí" : "No"} />
+            <ReadOnlyCard label="Cirugías previas" value={inheritedContext.hasPreviousEarSurgeries ? "Sí" : "No"} />
+            <ReadOnlyCard label="Uso de audífonos" value={inheritedContext.usesHearingAid ? "Sí" : "No"} />
+            <ReadOnlyCard label="Otalgia" value={inheritedContext.otalgia ? "Sí" : "No"} />
+            <ReadOnlyCard label="Hipoacusia" value={inheritedContext.hipoacusia ? "Sí" : "No"} />
+            <ReadOnlyCard label="Plenitud ótica" value={inheritedContext.plenitudOtica ? "Sí" : "No"} />
+            <ReadOnlyCard label="Otorrea" value={inheritedContext.otorrea ? "Sí" : "No"} />
+            <ReadOnlyCard label="Prurito" value={inheritedContext.prurito ? "Sí" : "No"} />
+            <ReadOnlyCard label="Otorragia" value={inheritedContext.otorragia ? "Sí" : "No"} />
+            <ReadOnlyCard label="Mal olor con audífonos" value={inheritedContext.hearingAidBadSmell ? "Sí" : "No"} />
           </div>
         </section>
 
         <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
             <h4 className="text-lg font-semibold text-slate-900">Variables propias del pre-lavado</h4>
-            <p className="mt-1 text-sm text-slate-500">Aqui solo se registran hallazgos exclusivos de esta evaluacion.</p>
+            <p className="mt-1 text-sm text-slate-500">Aquí solo se registran hallazgos exclusivos de esta evaluación.</p>
           </div>
 
           <div className="grid gap-4">
@@ -605,8 +605,8 @@ function PreLavadoSection({ patientId, patientName, patientAge, patientDiagnosis
 
       <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div>
-          <h4 className="text-lg font-semibold text-slate-900">IV. Evaluacion otoscopica pre-lavado</h4>
-          <p className="mt-1 text-sm text-slate-500">Comparacion estructurada entre oido derecho y oido izquierdo.</p>
+          <h4 className="text-lg font-semibold text-slate-900">IV. Evaluación otoscópica pre-lavado</h4>
+          <p className="mt-1 text-sm text-slate-500">Comparacion estructurada entre oído derecho y oído izquierdo.</p>
         </div>
 
         <div className="space-y-4">

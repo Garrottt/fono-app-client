@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
 import type { Patient } from "../types/patient.types"
@@ -87,7 +87,7 @@ function ClinicalModuleLayout({
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Nombre, email o telefono"
+            placeholder="Nombre, email o teléfono"
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
           />
           <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-300">
@@ -173,7 +173,7 @@ function ClinicalModuleLayout({
         <div className="rounded-[1.6rem] border border-white/70 bg-white/76 p-4 shadow-[0_18px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Modulo clínico</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Módulo clínico</p>
               <h2 className="fono-title mt-1 text-2xl font-semibold text-slate-950">{title}</h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
             </div>
@@ -250,4 +250,3 @@ function ClinicalModuleLayout({
 }
 
 export default ClinicalModuleLayout
-

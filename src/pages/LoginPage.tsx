@@ -7,7 +7,7 @@ import { loginService } from "../services/auth.service"
 
 const CERTIFICATIONS = [
   "Licenciada en Fonoaudiología · Universidad Andrés Bello",
-  "Curso Lavado de oidos · Safoin ",
+  "Curso Lavado de oídos · Safoin",
   "Curso internacional en metodologías de investigación aplicadas a la Fonoaudiología · Universidad Europea de Madrid",
   "Curso internacional en gestión y emprendimiento en Fonoaudiología · Universidad Europea de Madrid"
 ]
@@ -73,7 +73,7 @@ function LoginPage() {
                 Ana Sol Munizaga Saldaño
               </h1>
               <p className="mt-4 text-lg font-medium text-teal-100/92 sm:text-xl">
-                Estudiante De Fonoaudióloga - Quinto año
+                Fonoaudióloga
               </p>
               <p className="mt-6 max-w-2xl text-base leading-8 text-white/78 sm:text-lg">
                 Un acceso clínico pensado para revisar pacientes, ordenar objetivos terapéuticos,

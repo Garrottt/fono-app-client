@@ -29,7 +29,7 @@ function AppRoutes() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 text-sm text-slate-500">
-        Validando sesion...
+        Validando sesión...
       </div>
     )
   }

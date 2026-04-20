@@ -142,7 +142,7 @@ function PatientPortalPage() {
             onClick={handleLogout}
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50"
           >
-            Cerrar sesion
+            Cerrar sesión
           </button>
         </div>
       </header>
@@ -176,14 +176,14 @@ function PatientPortalPage() {
               <div className="flex flex-col gap-3">
                 {sessions.length === 0 ? (
                   <div className="rounded-lg bg-white p-8 text-center shadow-sm">
-                    <p className="text-gray-400">No hay sesiones registradas todavia.</p>
+                    <p className="text-gray-400">No hay sesiones registradas todavía.</p>
                   </div>
                 ) : sessions.map((session) => (
                   <div key={session.id} className="rounded-lg bg-white p-5 shadow-sm">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <p className="text-xs text-gray-400">{formatDate(session.date)}</p>
                       <span className="rounded-full bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700">
-                        Sesion {session.sessionNumber}
+                        Sesión {session.sessionNumber}
                       </span>
                     </div>
                     <p className="text-sm leading-relaxed text-gray-700">{session.whatWasDone}</p>
@@ -229,7 +229,7 @@ function PatientPortalPage() {
               <div className="flex flex-col gap-4">
                 {goals.length === 0 ? (
                   <div className="rounded-lg bg-white p-8 text-center shadow-sm">
-                    <p className="text-gray-400">No hay objetivos registrados todavia.</p>
+                    <p className="text-gray-400">No hay objetivos registrados todavía.</p>
                   </div>
                 ) : goals.map((goal) => {
                   const completedOperationalGoals = goal.operationalGoals.filter((operationalGoal) => operationalGoal.completed).length

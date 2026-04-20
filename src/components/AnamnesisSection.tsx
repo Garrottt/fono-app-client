@@ -43,47 +43,47 @@ const SYMPTOM_GUIDANCE = [
   {
     key: "otalgia",
     label: "Otalgia (dolor)",
-    help: "Otitis externa bacteriana, otitis media aguda, dermatitis del CAE e impactacion de cerumen."
+    help: "Otitis externa bacteriana, otitis medía aguda, dermatitis del CAE e impactación de cerumen."
   },
   {
     key: "prurito",
-    label: "Prurito (picazon)",
+    label: "Prurito (picazón)",
     help: "Otomicosis, dermatitis o eczema y etapas iniciales de otitis externa bacteriana."
   },
   {
     key: "hipoacusia",
-    label: "Hipoacusia (baja audicion)",
-    help: "Tapon de cerumen, cuerpo extrano, otitis media con efusion, perforacion timpanica y OMA."
+    label: "Hipoacusia (baja audición)",
+    help: "Tapon de cerumen, cuerpo extraño, otitis medía con efusión, perforación timpanica y OMA."
   },
   {
     key: "otorrea",
-    label: "Otorrea (secrecion)",
-    help: "Otitis media cronica, OMA con perforacion, otitis externa bacteriana y otomicosis."
+    label: "Otorrea (secreción)",
+    help: "Otitis medía crónica, OMA con perforación, otitis externa bacteriana y otomicosis."
   },
   {
     key: "otorragia",
     label: "Otorragia (sangrado)",
-    help: "Perforacion timpanica traumatica, heridas por cotonitos u otitis externa maligna."
+    help: "Perforación timpánica traumática, heridas por cotonitos u otitis externa maligna."
   },
   {
     key: "plenitudOtica",
-    label: "Plenitud otica (oido tapado)",
-    help: "Tapon de cerumen, disfuncion tubaria, otitis media con efusion y cuerpos extranos."
+    label: "Plenitud ótica (oído tapado)",
+    help: "Tapon de cerumen, disfunción tubaria, otitis medía con efusión y cuerpos extraños."
   },
   {
     key: "tinnitus",
     label: "Tinnitus (zumbidos)",
-    help: "Tapon de cerumen, perforacion timpanica y cuadros de oido interno."
+    help: "Tapon de cerumen, perforación timpanica y cuadros de oído interno."
   },
   {
     key: "vertigoInestabilidad",
-    label: "Vertigo / inestabilidad",
-    help: "Compromiso vestibular, perforacion timpanica o sensibilidad a irrigacion."
+    label: "Vértigo / inestabilidad",
+    help: "Compromiso vestibular, perforación timpanica o sensibilidad a irrigacion."
   },
   {
     key: "autofonia",
-    label: "Autofonia (oir su voz)",
-    help: "Disfuncion tubaria y oido medio con efusion."
+    label: "Autofonia (oír su voz)",
+    help: "Disfuncion tubaria y oído medio con efusión."
   }
 ] as const
 
@@ -175,7 +175,7 @@ function SymptomField({
             onClick={onToggleHelp}
             className="text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-800"
           >
-            {expanded ? "Ocultar orientacion" : "Ver orientacion"}
+            {expanded ? "Ocultar orientación" : "Ver orientación"}
           </button>
           {expanded && (
             <p className="mt-3 text-sm leading-7 text-slate-600">{help}</p>
@@ -289,19 +289,19 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
     const alerts: string[] = []
 
     if (form.hasDiabetesOrImmunosuppression) {
-      alerts.push("Riesgo clinico a revisar antes de intervenir: antecedentes de diabetes mellitus o inmunosupresion.")
+      alerts.push("Riesgo clínico a revisar antes de intervenir: antecedentes de díabetes mellitus o inmunosupresión.")
     }
 
     if (form.hasPreviousEarSurgeries) {
-      alerts.push("Precaucion: antecedente asociado a no realizar procedimiento sin reevaluacion clinica.")
+      alerts.push("Precaución: antecedente asociado a no realizar procedimiento sin reevaluación clínica.")
     }
 
     if (form.otorrea) {
-      alerts.push("Precaucion: la presencia de otorrea se asocia a no realizar procedimiento hasta evaluar causa clinica.")
+      alerts.push("Precaución: la presencia de otorrea se asocia a no realizar procedimiento hasta evaluar causa clínica.")
     }
 
     if (form.otorragia) {
-      alerts.push("Precaucion: la presencia de otorragia requiere revision clinica previa y se asocia a no realizar procedimiento.")
+      alerts.push("Precaución: la presencia de otorragia requiere revisión clínica previa y se asocia a no realizar procedimiento.")
     }
 
     return alerts
@@ -369,7 +369,7 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-400">Anamnesis</p>
                 <h3 className="mt-2 text-2xl font-semibold text-slate-900">{patientName}</h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  {anamnesis ? "Modulo clinico editable del paciente." : "Todavia no hay anamnesis cargada para este paciente."}
+                  {anamnesis ? "Módulo clínico editable del paciente." : "Todavía no hay anamnesis cargada para este paciente."}
                 </p>
               </div>
 
@@ -396,8 +396,8 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
           <div className="grid gap-3 px-5 py-4 md:grid-cols-2 xl:grid-cols-4">
             <ReadOnlyCard label="Paciente" value={patientName} />
             <ReadOnlyCard label="Edad" value={patientAge?.toString() || "No registrada"} />
-            <ReadOnlyCard label="Diagnostico" value={patientDiagnosis || "Sin diagnostico"} />
-            <ReadOnlyCard label="Ultima actualizacion" value={formatUpdatedAt(anamnesis?.updatedAt)} />
+            <ReadOnlyCard label="Diagnóstico" value={patientDiagnosis || "Sin díagnóstico"} />
+            <ReadOnlyCard label="Última actualizacion" value={formatUpdatedAt(anamnesis?.updatedAt)} />
           </div>
         </div>
       </div>
@@ -435,13 +435,13 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
               rows={4}
             />
             <TextCard
-              label="Diagnostico audiologico previo"
+              label="Diagnóstico audiologico previo"
               value={form.previousAudiologicalDiagnosis || ""}
               onChange={(value) => updateField("previousAudiologicalDiagnosis", value)}
               rows={3}
             />
             <TextCard
-              label="Ultima revision auditiva ORL o FONO"
+              label="Última revision auditiva ORL o FONO"
               value={form.lastAuditoryReview || ""}
               onChange={(value) => updateField("lastAuditoryReview", value)}
               rows={3}
@@ -452,22 +452,22 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
         <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
             <h4 className="text-lg font-semibold text-slate-900">II. Antecedentes personales</h4>
-            <p className="mt-1 text-sm text-slate-500">Factores de riesgo, antecedentes de oido y habitos relevantes.</p>
+            <p className="mt-1 text-sm text-slate-500">Factores de riesgo, antecedentes de oído y hábitos relevantes.</p>
           </div>
 
           <div className="space-y-4">
             <BinaryField
-              label="Diabetes Mellitus o inmunosupresion?"
+              label="Diabetes Mellitus o inmunosupresión?"
               value={form.hasDiabetesOrImmunosuppression}
               onChange={(value) => updateField("hasDiabetesOrImmunosuppression", value)}
               help="Riesgo de otitis externa maligna."
             />
 
             <BinaryField
-              label="Cirugias de oido previas?"
+              label="Cirugías de oído previas?"
               value={form.hasPreviousEarSurgeries}
               onChange={(value) => updateField("hasPreviousEarSurgeries", value)}
-              help="En caso positivo, requiere precaucion clinica antes de realizar procedimiento."
+              help="En caso positivo, requiere precaución clinica antes de realizar procedimiento."
             />
 
             {form.hasPreviousEarSurgeries && (
@@ -489,7 +489,7 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
             />
 
             <BinaryField
-              label="Uso de audifonos?"
+              label="Uso de audífonos?"
               value={form.usesHearingAid}
               onChange={(value) => updateField("usesHearingAid", value)}
             />
@@ -497,25 +497,25 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
             {form.usesHearingAid && (
               <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <BinaryField
-                  label="Siente que el audifono le ajusta menos o le molesta mas ultimamente?"
+                  label="Siente que el audífono le ajusta menos o le molesta más últimamente?"
                   value={form.hearingAidFeelsLooserOrAnnoying}
                   onChange={(value) => updateField("hearingAidFeelsLooserOrAnnoying", value)}
-                  help="Puede indicar inflamacion del CAE."
+                  help="Puede indicar inflamación del CAE."
                 />
                 <BinaryField
-                  label="Ha notado que el audifono suena mas bajo o tiene un pitido constante?"
+                  label="Ha notado que el audífono suena más bajo o tiene un pitido constante?"
                   value={form.hearingAidSoundsLowerOrWhistles}
                   onChange={(value) => updateField("hearingAidSoundsLowerOrWhistles", value)}
-                  help="Puede sugerir tapon de cerumen."
+                  help="Puede sugerir tapón de cerumen."
                 />
                 <BinaryField
-                  label="Presenta supuracion o mal olor al quitarse el aparato?"
+                  label="Presenta supuración o mal olor al quitarse el aparato?"
                   value={form.hearingAidSuppurationOrBadSmell}
                   onChange={(value) => updateField("hearingAidSuppurationOrBadSmell", value)}
-                  help="Puede asociarse a otitis media cronica o externa."
+                  help="Puede asociarse a otitis medía crónica o externa."
                 />
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <label className="text-sm font-semibold text-slate-800">Cuantas horas al dia lo utiliza?</label>
+                  <label className="text-sm font-semibold text-slate-800">Cuántas horas al día lo utiliza?</label>
                   <input
                     type="text"
                     value={form.hearingAidHoursPerDay || ""}
@@ -531,12 +531,12 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
               label="Se limpia con cotonitos u objetos?"
               value={form.cleansWithCottonSwabsOrObjects}
               onChange={(value) => updateField("cleansWithCottonSwabsOrObjects", value)}
-              help="Factor causal de tapon de cerumen impactado o traumatismo."
+              help="Factor causal de tapón de cerumen impactado o traumatismo."
             />
 
             {form.cleansWithCottonSwabsOrObjects && (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <label className="text-sm font-semibold text-slate-800">Cuales?</label>
+                <label className="text-sm font-semibold text-slate-800">Cuáles?</label>
                 <input
                   type="text"
                   value={form.cleaningObjects || ""}
@@ -552,8 +552,8 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
 
       <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div>
-          <h4 className="text-lg font-semibold text-slate-900">III. Identificacion de sintomas y asociacion clinica</h4>
-          <p className="mt-1 text-sm text-slate-500">Registro binario de sintomas presentes con apoyo clinico orientativo.</p>
+          <h4 className="text-lg font-semibold text-slate-900">III. Identificación de sintomás y asociación clinica</h4>
+          <p className="mt-1 text-sm text-slate-500">Registro binario de sintomás presentes con apoyo clínico orientativo.</p>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">

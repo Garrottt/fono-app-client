@@ -66,8 +66,8 @@ function InterventionHierarchySection({
         strategies: strategiesDraft.trim()
       })
       setEditing(false)
-    } catch (saveError) {
-      setError("Error al guardar la jerarquizacion de contenidos")
+    } catch {
+      setError("Error al guardar la jerarquización de contenidos")
     } finally {
       setSaving(false)
     }
@@ -81,13 +81,13 @@ function InterventionHierarchySection({
         <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-400">Plan terapeutico</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-400">Plan terapéutico</p>
               <h3 className="mt-1 text-xl font-semibold text-slate-900">
-                Jerarquizacion de contenidos de intervencion
+                Jerarquización de contenidos de intervención
               </h3>
               <p className="mt-1 max-w-3xl text-sm text-slate-500">
-                Este bloque define la jerarquizacion que luego usan las sesiones. Queda arriba de Objetivos
-                y ya no se completa dentro de cada sesion.
+                Este bloque define la jerarquización que luego usan las sesiones. Queda arriba de
+                Objetivos y ya no se completa dentro de cada sesión.
               </p>
             </div>
             <button
@@ -95,7 +95,7 @@ function InterventionHierarchySection({
               onClick={() => setEditing((current) => !current)}
               className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
             >
-              {editing ? "Cancelar" : hasHierarchy ? "Editar jerarquizacion" : "Cargar jerarquizacion"}
+              {editing ? "Cancelar" : hasHierarchy ? "Editar jerarquización" : "Cargar jerarquización"}
             </button>
           </div>
         </div>
@@ -157,7 +157,7 @@ function InterventionHierarchySection({
 
               {[
                 {
-                  label: "Criterio(s) de jerarquizacion",
+                  label: "Criterio(s) de jerarquización",
                   value: criteriaDraft,
                   setter: setCriteriaDraft,
                   multiline: false
@@ -208,7 +208,7 @@ function InterventionHierarchySection({
                   disabled={saving}
                   className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
                 >
-                  {saving ? "Guardando..." : "Guardar jerarquizacion"}
+                  {saving ? "Guardando..." : "Guardar jerarquización"}
                 </button>
               </div>
             </div>
@@ -217,7 +217,7 @@ function InterventionHierarchySection({
               {!hasHierarchy ? (
                 <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
                   <p className="text-sm text-slate-500">
-                    Todavia no hay jerarquizacion cargada. Regístrala aqui para que las sesiones la hereden.
+                    Todavía no hay jerarquización cargada. Regístrala aquí para que las sesiones la hereden.
                   </p>
                 </div>
               ) : (
@@ -241,7 +241,7 @@ function InterventionHierarchySection({
                   </div>
 
                   {[
-                    ["Criterio(s) de jerarquizacion", hierarchyCriteria],
+                    ["Criterio(s) de jerarquización", hierarchyCriteria],
                     ["Enfoque", focus],
                     ["Modalidad", modality],
                     ["Estrategia/s", strategies]
@@ -251,7 +251,7 @@ function InterventionHierarchySection({
                         {label}
                       </div>
                       <div className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700">
-                        {value || "—"}
+                        {value || "-"}
                       </div>
                     </div>
                   ))}

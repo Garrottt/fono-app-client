@@ -198,7 +198,7 @@ function TaskFilesList({
   onDelete
 }: TaskFilesListProps) {
   if (files.length === 0) {
-    return <p className="mt-3 text-sm text-slate-500">Todavia no hay archivos para esta indicacion.</p>
+    return <p className="mt-3 text-sm text-slate-500">Todavía no hay archivos para esta indicación.</p>
   }
 
   return (
@@ -395,9 +395,9 @@ function SessionsSection({
       onSessionsChange(nextSessions)
       setExpandedSessionId(createdSession.id)
       resetCreateForm()
-      setSessionMessage("Sesion guardada correctamente.")
+      setSessionMessage("Sesión guardada correctamente.")
     } catch (error) {
-      onError(getRequestErrorMessage(error, "Error al guardar la sesion. Revisa que la ficha clinica este completa."))
+      onError(getRequestErrorMessage(error, "Error al guardar la sesión. Revisa que la ficha clínica esté completa."))
     } finally {
       setSaving(false)
     }
@@ -431,16 +431,16 @@ function SessionsSection({
       )
       setEditingSessionId(null)
       setEditForm(null)
-      setSessionMessage(`Sesion ${updatedSession.sessionNumber} actualizada.`)
+      setSessionMessage(`Sesión ${updatedSession.sessionNumber} actualizada.`)
     } catch (error) {
-      onError(getRequestErrorMessage(error, "Error al actualizar la sesion."))
+      onError(getRequestErrorMessage(error, "Error al actualizar la sesión."))
     } finally {
       setSaving(false)
     }
   }
 
   const handleDeleteSession = async (sessionId: string) => {
-    if (!window.confirm("Esta accion eliminara la sesion y toda su planificacion. Continuar?")) return
+    if (!window.confirm("Esta accion eliminara la sesión y toda su planificación. Continuar?")) return
 
     setSaving(true)
     setSessionMessage("")
@@ -460,9 +460,9 @@ function SessionsSection({
         setEditForm(null)
       }
 
-      setSessionMessage("Sesion eliminada correctamente.")
+      setSessionMessage("Sesión eliminada correctamente.")
     } catch (error) {
-      onError("Error al eliminar la sesion.")
+      onError("Error al eliminar la sesión.")
     } finally {
       setSaving(false)
     }
@@ -500,9 +500,9 @@ function SessionsSection({
             : session
         )
       )
-      setSessionMessage("Archivo adjuntado a la sesion.")
+      setSessionMessage("Archivo adjuntado a la sesión.")
     } catch (error) {
-      onError("Error al subir el archivo de la sesion.")
+      onError("Error al subir el archivo de la sesión.")
     } finally {
       setUploadingTaskKey(null)
     }
@@ -533,9 +533,9 @@ function SessionsSection({
             : session
         )
       )
-      setSessionMessage("Archivo eliminado de la sesion.")
+      setSessionMessage("Archivo eliminado de la sesión.")
     } catch (error) {
-      onError("Error al eliminar el archivo de la sesion.")
+      onError("Error al eliminar el archivo de la sesión.")
     } finally {
       setUploadingTaskKey(null)
     }
@@ -553,7 +553,7 @@ const renderSessionForm = (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[240px_minmax(0,1fr)]">
         <div className="space-y-1">
-          <label className="text-sm font-medium text-slate-700">Fecha de la sesion</label>
+          <label className="text-sm font-medium text-slate-700">Fecha de la sesión</label>
           <input
             type="date"
             value={form.date}
@@ -587,7 +587,7 @@ const renderSessionForm = (
       <div className="rounded-2xl border border-slate-200">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
           <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-            Objetivos especificos y operacionales
+            Objetivos específicos y operacionales
           </h4>
         </div>
         <div className="space-y-4 p-4">
@@ -601,7 +601,7 @@ const renderSessionForm = (
                 <div className="flex flex-col gap-3">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-indigo-500">
-                      Buscar objetivo especifico
+                      Buscar objetivo específico
                     </p>
                     <p className="text-sm text-slate-600">
                       Busca un O.E. existente y trae automáticamente sus objetivos operacionales asociados.
@@ -621,7 +621,7 @@ const renderSessionForm = (
 
                 {specificObjectiveLibrary.length === 0 ? (
                   <p className="mt-3 text-sm text-slate-500">
-                    Primero carga objetivos especificos y operacionales en el bloque de Objetivos.
+                    Primero carga objetivos específicos y operacionales en el bloque de Objetivos.
                   </p>
                 ) : specificObjectiveMatches.length === 0 ? (
                   <p className="mt-3 text-sm text-slate-500">
@@ -681,7 +681,7 @@ const renderSessionForm = (
                     </div>
                     <div className="rounded-xl border border-slate-200 bg-white px-3 py-3">
                       <p className="text-sm leading-relaxed text-slate-700">
-                        {specificObjective.description || "Selecciona un objetivo especifico desde el buscador."}
+                        {specificObjective.description || "Selecciona un objetivo específico desde el buscador."}
                       </p>
                     </div>
                   </div>
@@ -712,10 +712,10 @@ const renderSessionForm = (
       {form.specificObjectives.length === 0 && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center">
           <p className="text-sm text-slate-500">
-            Todavia no has asociado objetivos especificos a esta sesion.
+            Todavía no has asociado objetivos específicos a esta sesión.
           </p>
           <p className="mt-2 text-xs text-slate-400">
-            Puedes guardar la sesion igual y vincular los O.E. mas tarde desde este mismo bloque.
+            Puedes guardar la sesión igual y vincular los O.E. más tarde desde este mismo bloque.
           </p>
         </div>
       )}
@@ -727,10 +727,10 @@ const renderSessionForm = (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                Tareas e indicaciones de la sesion
+                Tareas e indicaciónes de la sesión
               </h4>
               <p className="mt-1 text-xs text-slate-500">
-                Opcional. Agrega indicaciones solo cuando corresponda.
+                Opcional. Agrega indicaciónes solo cuando corresponda.
               </p>
             </div>
             <button
@@ -741,7 +741,7 @@ const renderSessionForm = (
               }))}
               className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
             >
-              + Agregar indicacion
+              + Agregar indicación
             </button>
           </div>
         </div>
@@ -749,7 +749,7 @@ const renderSessionForm = (
           {form.sessionTasks.length === 0 && (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-6 text-center">
               <p className="text-sm text-slate-500">
-                No hay tareas ni indicaciones cargadas en esta sesion.
+                No hay tareas ni indicaciónes cargadas en esta sesión.
               </p>
             </div>
           )}
@@ -783,7 +783,7 @@ const renderSessionForm = (
                     )
                   }))}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Titulo o nombre de la indicacion"
+                  placeholder="Titulo o nombre de la indicación"
                 />
                 <textarea
                   value={sessionTask.description || ""}
@@ -803,11 +803,11 @@ const renderSessionForm = (
               <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">Archivo para la indicacion</p>
+                    <p className="text-sm font-semibold text-slate-700">Archivo para la indicación</p>
                     <p className="mt-1 text-xs text-slate-500">
                       {sessionTask.id
-                        ? "Puedes adjuntar PDF, Word o imagenes directamente a esta indicacion."
-                        : "Guarda la sesion primero para poder adjuntar PDF, Word o imagenes a esta indicacion."}
+                        ? "Puedes adjuntar PDF, Word o imágenes directamente a esta indicación."
+                        : "Guarda la sesión primero para poder adjuntar PDF, Word o imágenes a esta indicación."}
                     </p>
                   </div>
                   {sessionTask.id && editingSessionId ? (
@@ -849,14 +849,14 @@ const renderSessionForm = (
         <div>
           <label className="text-sm font-medium text-slate-700">Resumen de lo trabajado</label>
           <p className="mt-1 text-xs text-slate-500">
-            Opcional. Puedes guardarlo despues si en este momento solo quieres planificar la sesion.
+            Opcional. Puedes guardarlo despues si en este momento solo quieres planificar la sesión.
           </p>
         </div>
         <textarea
           value={form.whatWasDone}
           onChange={(event) => setForm((current) => ({ ...current, whatWasDone: event.target.value }))}
           className="min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-          placeholder="Describe lo trabajado, avances, dificultades o acuerdos de la sesion."
+          placeholder="Describe lo trabajado, avances, dificultades o acuerdos de la sesión."
         />
       </div>
 
@@ -877,11 +877,11 @@ const renderSessionForm = (
     <section className="space-y-4">
       <div className="flex flex-col gap-3 rounded-2xl bg-slate-900 px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">Seguimiento clinico</p>
-          <h3 className="mt-2 text-xl font-semibold">Sesiones de intervencion</h3>
+          <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">Seguimiento clínico</p>
+          <h3 className="mt-2 text-xl font-semibold">Sesiones de intervención</h3>
           <p className="mt-1 max-w-3xl text-sm text-slate-300">
-            Cada sesion integra jerarquizacion, objetivo general, objetivos especificos, objetivos operacionales
-            e indicaciones en una sola ficha.
+            Cada sesión integra jerarquización, objetivo general, objetivos específicos, objetivos operacionales
+            e indicaciónes en una sola ficha.
           </p>
         </div>
         <button
@@ -893,7 +893,7 @@ const renderSessionForm = (
           }}
           className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
         >
-          {showCreateForm ? "Cancelar nueva sesion" : "+ Nueva sesion"}
+          {showCreateForm ? "Cancelar nueva sesión" : "+ Nueva sesión"}
         </button>
       </div>
 
@@ -906,13 +906,13 @@ const renderSessionForm = (
       {showCreateForm && (
         <form onSubmit={handleCreateSession} className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-5">
-            <p className="text-xs uppercase tracking-[0.3em] text-indigo-400">Nueva sesion</p>
-            <h4 className="mt-1 text-lg font-semibold text-slate-800">Planificacion de sesion</h4>
+            <p className="text-xs uppercase tracking-[0.3em] text-indigo-400">Nueva sesión</p>
+            <h4 className="mt-1 text-lg font-semibold text-slate-800">Planificacion de sesión</h4>
           </div>
           {renderSessionForm(
             { ...createForm, generalObjective: generalObjective.trim() },
             updateCreateForm,
-            "Guardar sesion",
+            "Guardar sesión",
             saving ||
               !generalObjective.trim() ||
               !contentHierarchy.some((item) => item.trim()) ||
@@ -928,7 +928,7 @@ const renderSessionForm = (
 
       {orderedSessions.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
-          <p className="text-sm text-slate-500">Aun no hay sesiones registradas para este paciente.</p>
+          <p className="text-sm text-slate-500">Aún no hay sesiónes registradas para este paciente.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -944,7 +944,7 @@ const renderSessionForm = (
                     <div className="space-y-3">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
-                          Sesion {session.sessionNumber}
+                          Sesión {session.sessionNumber}
                         </span>
                         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${completionState.styles}`}>
                           {completionState.label}
@@ -957,7 +957,7 @@ const renderSessionForm = (
                           <p className="mt-1 line-clamp-2 text-sm text-slate-700">{session.whatWasDone}</p>
                         </div>
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-slate-400">Objetivos especificos</p>
+                          <p className="text-xs uppercase tracking-wide text-slate-400">Objetivos específicos</p>
                           <p className="mt-1 text-sm font-semibold text-slate-700">{session.specificObjectives.length}</p>
                         </div>
                         <div>
@@ -1052,7 +1052,7 @@ const renderSessionForm = (
                           <div className="overflow-x-auto">
                             <div className="min-w-[720px]">
                               <div className="grid grid-cols-[260px_minmax(0,1fr)] border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700">
-                                <div className="border-r border-slate-200 px-4 py-3">Objetivos especificos (O.E.)</div>
+                                <div className="border-r border-slate-200 px-4 py-3">Objetivos específicos (O.E.)</div>
                                 <div className="px-4 py-3">Objetivos operacionales (O.O.)</div>
                               </div>
                               <div className="divide-y divide-slate-200">
@@ -1082,12 +1082,12 @@ const renderSessionForm = (
                         <section className="rounded-2xl border border-slate-200">
                           <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
                             <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                              Tareas e indicaciones
+                              Tareas e indicaciónes
                             </h4>
                           </div>
                           <div className="space-y-3 p-4">
                             {session.sessionTasks.length === 0 ? (
-                              <p className="text-sm text-slate-500">No hay indicaciones registradas para esta sesion.</p>
+                              <p className="text-sm text-slate-500">No hay indicaciónes registradas para esta sesión.</p>
                             ) : session.sessionTasks.map((sessionTask, taskIndex) => (
                               <div key={sessionTask.id} className="rounded-2xl border border-slate-200 p-4">
                                 <p className="text-sm font-semibold text-slate-800">
@@ -1101,7 +1101,7 @@ const renderSessionForm = (
                                     <div>
                                       <p className="text-sm font-semibold text-slate-700">Material adjunto</p>
                                       <p className="mt-1 text-xs text-slate-500">
-                                        Sube PDF, Word o imagenes relacionadas con esta indicacion.
+                                        Sube PDF, Word o imágenes relacionadas con esta indicación.
                                       </p>
                                     </div>
                                     <label className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50">
@@ -1122,7 +1122,7 @@ const renderSessionForm = (
                                   </div>
 
                                   {sessionTask.files.length === 0 ? (
-                                    <p className="mt-3 text-sm text-slate-500">Todavia no hay archivos para esta indicacion.</p>
+                                    <p className="mt-3 text-sm text-slate-500">Todavía no hay archivos para esta indicación.</p>
                                   ) : (
                                     <div className="mt-3 space-y-2">
                                       {sessionTask.files.map((file) => (
