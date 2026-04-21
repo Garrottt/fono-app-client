@@ -8,7 +8,7 @@
         <span className="relative font-black leading-none text-teal-700 text-[1.45rem]">F</span>
       </div>
       <div className="min-w-0">
-        <p className={`fono-title font-semibold text-slate-950 ${compact ? "text-lg" : "text-2xl"}`}>
+        <p className={`fono-title font-semibold text-slate-200 ${compact ? "text-lg" : "text-2xl"}`}>
           FonoWebApp
         </p>
         
