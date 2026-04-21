@@ -11,9 +11,7 @@
         <p className={`fono-title font-semibold text-slate-950 ${compact ? "text-lg" : "text-2xl"}`}>
           FonoWebApp
         </p>
-        <p className="text-xs font-medium tracking-[0.18em] text-slate-400 uppercase">
-          Clinical Flow
-        </p>
+        
       </div>
     </div>
   )
