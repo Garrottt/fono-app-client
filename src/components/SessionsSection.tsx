@@ -95,8 +95,7 @@ const hasRequiredPlanningData = ({
   contentHierarchy,
   hierarchyCriteria,
   focus,
-  modality,
-  strategies
+  modality
 }: Pick<
   SessionsSectionProps,
   "generalObjective" | "contentHierarchy" | "hierarchyCriteria" | "focus" | "modality" | "strategies"
@@ -105,8 +104,7 @@ const hasRequiredPlanningData = ({
   contentHierarchy.some((item) => item.trim()) &&
   Boolean(hierarchyCriteria.trim()) &&
   Boolean(focus.trim()) &&
-  Boolean(modality.trim()) &&
-  Boolean(strategies.trim())
+  Boolean(modality.trim())
 )
 
 const mapSessionToForm = (session: Session): SessionFormState => ({
@@ -175,7 +173,6 @@ const getCompletionState = (session: Session) => {
     session.hierarchyCriteria.trim() &&
     session.focus.trim() &&
     session.modality.trim() &&
-    session.strategies.trim() &&
     session.generalObjective.trim() &&
     session.specificObjectives.length > 0
 
@@ -908,7 +905,7 @@ const renderSessionForm = (
       }) && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Para guardar una sesion primero debes completar la planificacion clinica del paciente:
-          objetivo general, jerarquizacion, criterio, foco, modalidad y estrategias.
+          objetivo general, jerarquizacion, criterio, foco y modalidad.
         </div>
       )}
 
