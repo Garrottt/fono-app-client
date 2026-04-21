@@ -4,6 +4,7 @@ export interface SessionOperationalObjective {
   id: string
   specificObjectiveId: string
   description: string
+  activities: string[]
   order: number
   createdAt: string
   updatedAt: string
@@ -52,6 +53,7 @@ export interface Session {
 export interface SessionOperationalObjectiveInput {
   id?: string
   description: string
+  activities?: string[]
   order: number
 }
 

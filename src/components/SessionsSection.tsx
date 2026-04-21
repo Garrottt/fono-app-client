@@ -62,6 +62,7 @@ const getRequestErrorMessage = (error: unknown, fallbackMessage: string) => {
 
 const createOperationalObjective = (description = "") => ({
   description,
+  activities: [],
   order: 1
 })
 
@@ -120,18 +121,19 @@ const mapSessionToForm = (session: Session): SessionFormState => ({
   strategies: session.strategies,
   generalObjective: session.generalObjective,
   specificObjectives: session.specificObjectives.length > 0
-    ? session.specificObjectives.map((specificObjective, specificIndex) => ({
-      id: specificObjective.id,
-      description: specificObjective.description,
-      order: specificIndex + 1,
-      operationalObjectives: specificObjective.operationalObjectives.length > 0
-        ? specificObjective.operationalObjectives.map((operationalObjective, operationalIndex) => ({
-          id: operationalObjective.id,
-          description: operationalObjective.description,
-          order: operationalIndex + 1
+        ? session.specificObjectives.map((specificObjective, specificIndex) => ({
+          id: specificObjective.id,
+          description: specificObjective.description,
+          order: specificIndex + 1,
+          operationalObjectives: specificObjective.operationalObjectives.length > 0
+            ? specificObjective.operationalObjectives.map((operationalObjective, operationalIndex) => ({
+              id: operationalObjective.id,
+              description: operationalObjective.description,
+              activities: operationalObjective.activities ?? [],
+              order: operationalIndex + 1
+            }))
+            : [createOperationalObjective()]
         }))
-        : [createOperationalObjective()]
-    }))
     : [],
   sessionTasks: session.sessionTasks.length > 0
     ? session.sessionTasks.map((sessionTask, taskIndex) => ({
@@ -159,6 +161,7 @@ const normalizeSessionForm = (form: SessionFormState): CreateSessionInput => ({
     operationalObjectives: specificObjective.operationalObjectives.map((operationalObjective, operationalIndex) => ({
       ...operationalObjective,
       description: operationalObjective.description.trim(),
+      activities: (operationalObjective.activities ?? []).map((activity) => activity.trim()),
       order: operationalIndex + 1
     }))
   })),
@@ -366,7 +369,14 @@ function SessionsSection({
             ...current.specificObjectives.filter((specificObjective) =>
               specificObjective.description.trim() || specificObjective.operationalObjectives.some((item) => item.description.trim())
             ),
-            createSpecificObjective(libraryItem.description, [operationalObjective.description])
+            {
+              ...createSpecificObjective(libraryItem.description, [operationalObjective.description]),
+              operationalObjectives: [{
+                ...createOperationalObjective(operationalObjective.description),
+                activities: [""],
+                order: 1
+              }]
+            }
           ]
         }
 
@@ -401,6 +411,7 @@ function SessionsSection({
               ...specificObjective.operationalObjectives,
               {
                 ...createOperationalObjective(operationalObjective.description),
+                activities: [""],
                 order: specificObjective.operationalObjectives.length + 1
               }
             ]
@@ -825,6 +836,94 @@ const renderSessionForm = (
                             </div>
                             <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
                               {operationalObjective.description}
+                            </div>
+                            <div className="mt-3 space-y-3">
+                              {(operationalObjective.activities ?? []).map((activity, activityIndex) => (
+                                <div key={`activity-${specificIndex}-${operationalIndex}-${activityIndex}`} className="space-y-2">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                                      Actividad {activityIndex + 1}
+                                    </p>
+                                    <button
+                                      type="button"
+                                      onClick={() => setForm((current) => ({
+                                        ...current,
+                                        specificObjectives: current.specificObjectives.map((currentSpecificObjective, currentSpecificIndex) => (
+                                          currentSpecificIndex !== specificIndex
+                                            ? currentSpecificObjective
+                                            : {
+                                              ...currentSpecificObjective,
+                                              operationalObjectives: currentSpecificObjective.operationalObjectives.map((currentOperationalObjective, currentOperationalIndex) => (
+                                                currentOperationalIndex !== operationalIndex
+                                                  ? currentOperationalObjective
+                                                  : {
+                                                    ...currentOperationalObjective,
+                                                    activities: (currentOperationalObjective.activities ?? []).filter((_, currentActivityIndex) => currentActivityIndex !== activityIndex)
+                                                  }
+                                              ))
+                                            }
+                                        ))
+                                      }))}
+                                      className="text-xs font-medium text-rose-500 transition hover:text-rose-700"
+                                    >
+                                      Quitar actividad
+                                    </button>
+                                  </div>
+                                  <textarea
+                                    value={activity}
+                                    onChange={(event) => setForm((current) => ({
+                                      ...current,
+                                      specificObjectives: current.specificObjectives.map((currentSpecificObjective, currentSpecificIndex) => (
+                                        currentSpecificIndex !== specificIndex
+                                          ? currentSpecificObjective
+                                          : {
+                                            ...currentSpecificObjective,
+                                            operationalObjectives: currentSpecificObjective.operationalObjectives.map((currentOperationalObjective, currentOperationalIndex) => (
+                                              currentOperationalIndex !== operationalIndex
+                                                ? currentOperationalObjective
+                                                : {
+                                                  ...currentOperationalObjective,
+                                                  activities: (currentOperationalObjective.activities ?? []).map((currentActivity, currentActivityIndex) => (
+                                                    currentActivityIndex === activityIndex ? event.target.value : currentActivity
+                                                  ))
+                                                }
+                                            ))
+                                          }
+                                      ))
+                                    }))}
+                                    rows={3}
+                                    className="min-h-24 w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm leading-relaxed focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                    placeholder="Describe la actividad que se realizará en torno a este objetivo operacional."
+                                  />
+                                </div>
+                              ))}
+
+                              {(operationalObjective.activities?.length ?? 0) < 3 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setForm((current) => ({
+                                    ...current,
+                                    specificObjectives: current.specificObjectives.map((currentSpecificObjective, currentSpecificIndex) => (
+                                      currentSpecificIndex !== specificIndex
+                                        ? currentSpecificObjective
+                                        : {
+                                          ...currentSpecificObjective,
+                                          operationalObjectives: currentSpecificObjective.operationalObjectives.map((currentOperationalObjective, currentOperationalIndex) => (
+                                            currentOperationalIndex !== operationalIndex
+                                              ? currentOperationalObjective
+                                              : {
+                                                ...currentOperationalObjective,
+                                                activities: [...(currentOperationalObjective.activities ?? []), ""]
+                                              }
+                                          ))
+                                        }
+                                    ))
+                                  }))}
+                                  className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50"
+                                >
+                                  + Agregar actividad
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))}
