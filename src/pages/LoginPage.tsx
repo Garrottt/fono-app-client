@@ -107,7 +107,7 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
                 Espacio profesional personalizado
               </p>
               <h1 className="fono-title mt-3 max-w-xl text-3xl font-semibold leading-tight text-white sm:text-4xl xl:text-5xl">
-                Ana Sol Munizaga Saldano
+                Ana Sol Munizaga Saldaño
               </h1>
               <p className="mt-3 text-base font-medium text-teal-100/92 sm:text-lg">Estudiante de Fonoaudiología | Quinto Año</p>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-white/78 sm:text-base">
@@ -137,9 +137,7 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
                       Presentación profesional
                     </h2>
                   </div>
-                  <p className="max-w-md text-sm leading-6 text-white/68">
-                    Una bienvenida más personal, más confiable y más coherente con la consulta.
-                  </p>
+                  
                 </div>
 
                 <div className="mt-6 grid gap-3">
@@ -258,7 +256,7 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
                   {pageCopy.alternateLabel}
                 </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Usa el acceso correspondiente para entrar al espacio correcto y evitar confusiones de sesión.
+                  Usa el acceso correspondiente, revisa tus objetivos y tareas asignadas
                 </p>
                 <Link
                   to={pageCopy.alternateHref}
@@ -266,15 +264,6 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
                 >
                   {pageCopy.alternateCta}
                 </Link>
-              </div>
-
-              <div className="mt-8 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  Recomendacion
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Si el acceso falla después de una sesión anterior, vuelve a ingresar para renovar tu sesión local de trabajo.
-                </p>
               </div>
             </div>
           </div>
