@@ -467,7 +467,7 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
               label="Cirugías de oído previas?"
               value={form.hasPreviousEarSurgeries}
               onChange={(value) => updateField("hasPreviousEarSurgeries", value)}
-              help="En caso positivo, requiere precaución clinica antes de realizar procedimiento."
+              help="En caso positivo, requiere precaución clínica antes de realizar procedimiento."
             />
 
             {form.hasPreviousEarSurgeries && (
@@ -552,7 +552,7 @@ function AnamnesisSection({ patientId, patientName, patientAge, patientDiagnosis
 
       <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div>
-          <h4 className="text-lg font-semibold text-slate-900">III. Identificación de sintomás y asociación clinica</h4>
+              <h4 className="text-lg font-semibold text-slate-900">III. Identificación de síntomas y asociación clínica</h4>
           <p className="mt-1 text-sm text-slate-500">Registro binario de sintomás presentes con apoyo clínico orientativo.</p>
         </div>
 

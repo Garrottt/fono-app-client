@@ -273,11 +273,11 @@ function PatientPortalPage() {
               <div className="flex flex-col gap-3">
                 <section className="flex flex-col gap-3">
                   <div className="px-1">
-                    <h2 className="text-sm font-semibold text-gray-800">Proximas citas</h2>
+            <h2 className="text-sm font-semibold text-gray-800">Próximas citas</h2>
                   </div>
                   {upcomingAppointments.length === 0 ? (
                     <div className="rounded-lg bg-white p-8 text-center shadow-sm">
-                      <p className="text-gray-400">No tienes proximas citas registradas.</p>
+              <p className="text-gray-400">No tienes próximas citas registradas.</p>
                     </div>
                   ) : upcomingAppointments.map((appointment) => (
                     <div key={appointment.id} className="rounded-lg bg-white p-5 shadow-sm">

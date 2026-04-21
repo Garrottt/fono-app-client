@@ -123,7 +123,7 @@ const computeLiveResult = (form: UpdatePreLavadoInput) => {
   }
 
   let diagnosticSummary = "Sín hipótesis automática concluyente"
-  let suggestedConduct = "Continuar evaluación clinica y confirmar conducta profesional según hallazgos."
+  let suggestedConduct = "Continuar evaluación clínica y confirmar conducta profesional según hallazgos."
 
   if ((form.prurito && form.otorrea) || hasFungi) {
     diagnosticSummary = "Sospecha de Otomicosis"

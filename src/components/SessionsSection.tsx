@@ -725,7 +725,7 @@ const renderSessionForm = (
                         <div className="mt-3 grid gap-2">
                           {libraryItem.operationalObjectives.length === 0 ? (
                             <p className="text-xs text-slate-400">
-                              Este O.E. aÃºn no tiene O.O. cargados.
+                              Este O.E. aún no tiene O.O. cargados.
                             </p>
                           ) : libraryItem.operationalObjectives.map((operationalObjective, operationalIndex) => {
                             const selected = isOperationalObjectiveSelected(
@@ -800,7 +800,7 @@ const renderSessionForm = (
                     <div>
                       <div className="mb-3 flex items-center justify-between gap-3">
                         <p className="text-sm font-semibold text-slate-700">Objetivos operacionales seleccionados</p>
-                        <span className="text-xs text-slate-500">Puedes quitar los que no usarÃ¡s</span>
+                        <span className="text-xs text-slate-500">Puedes quitar los que no usarás</span>
                       </div>
                       <div className="space-y-3">
                         {specificObjective.operationalObjectives.map((operationalObjective, operationalIndex) => (
@@ -1109,8 +1109,8 @@ const renderSessionForm = (
         strategies
       }) && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Para guardar una sesion primero debes completar la planificacion clinica del paciente:
-          objetivo general, jerarquizacion, criterio, foco y modalidad.
+          Para guardar una sesión primero debes completar la planificación clínica del paciente:
+          objetivo general, jerarquización, criterio, foco y modalidad.
         </div>
       )}
 

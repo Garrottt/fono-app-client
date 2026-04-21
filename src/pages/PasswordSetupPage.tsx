@@ -46,12 +46,12 @@ function PasswordSetupPage() {
     setError("")
 
     if (newPassword.length < 8) {
-      setError("La nueva contrasena debe tener al menos 8 caracteres")
+      setError("La nueva contraseña debe tener al menos 8 caracteres")
       return
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Las contrasenas no coinciden")
+      setError("Las contraseñas no coinciden")
       return
     }
 
@@ -65,7 +65,7 @@ function PasswordSetupPage() {
       setSuccess(response.message)
       setTimeout(() => navigate("/portal/login"), 1800)
     } catch (submitError: any) {
-      setError(submitError?.response?.data?.message || "No se pudo actualizar la contrasena")
+      setError(submitError?.response?.data?.message || "No se pudo actualizar la contraseña")
     } finally {
       setSubmitting(false)
     }
@@ -74,9 +74,9 @@ function PasswordSetupPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-6">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h1 className="mb-2 text-2xl font-bold text-gray-800">Configurar contrasena</h1>
+        <h1 className="mb-2 text-2xl font-bold text-gray-800">Configurar contraseña</h1>
         <p className="mb-6 text-sm text-gray-500">
-          Cambia tu contrasena temporal para acceder al portal de forma segura.
+          Cambia tu contraseña temporal para acceder al portal de forma segura.
         </p>
 
         {loading ? (
@@ -96,7 +96,7 @@ function PasswordSetupPage() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">Nueva contrasena</label>
+              <label className="text-sm font-medium text-gray-700">Nueva contraseña</label>
               <input
                 type="password"
                 value={newPassword}
@@ -108,13 +108,13 @@ function PasswordSetupPage() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">Confirmar contrasena</label>
+              <label className="text-sm font-medium text-gray-700">Confirmar contraseña</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Repite la contrasena"
+                placeholder="Repite la contraseña"
                 required
               />
             </div>
@@ -127,7 +127,7 @@ function PasswordSetupPage() {
               disabled={submitting || Boolean(success)}
               className="rounded-md bg-indigo-600 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {submitting ? "Guardando..." : "Guardar nueva contrasena"}
+            {submitting ? "Guardando..." : "Guardar nueva contraseña"}
             </button>
 
             <Link to="/portal/login" className="text-center text-sm text-gray-500 hover:text-gray-700">

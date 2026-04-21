@@ -367,7 +367,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
                       value={generalObjectiveDraft}
                       onChange={(event) => setGeneralObjectiveDraft(event.target.value)}
                       className="min-h-24 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                      placeholder="Describe el objetivo general del proceso terapeutico."
+                      placeholder="Describe el objetivo general del proceso terapéutico."
                     />
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <button
@@ -723,7 +723,7 @@ function GoalsSection({ patientId, currentGeneralObjective, onGeneralObjectiveSa
                                         value={noteText}
                                         onChange={(event) => setNoteText(event.target.value)}
                                         className="min-h-20 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                                        placeholder="Observacion clinica o contexto del avance."
+                                        placeholder="Observación clínica o contexto del avance."
                                       />
                                       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                                         <button
