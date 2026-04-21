@@ -109,7 +109,7 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
               <h1 className="fono-title mt-3 max-w-xl text-3xl font-semibold leading-tight text-white sm:text-4xl xl:text-5xl">
                 Ana Sol Munizaga Saldano
               </h1>
-              <p className="mt-3 text-base font-medium text-teal-100/92 sm:text-lg">Estudiante de Fonoaudióloga | Quinto Año</p>
+              <p className="mt-3 text-base font-medium text-teal-100/92 sm:text-lg">Estudiante de Fonoaudiología | Quinto Año</p>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-white/78 sm:text-base">
                 Un acceso clínico pensado para revisar pacientes, ordenar objetivos terapéuticos,
                 planificar sesiones y sostener una experiencia de atención más clara y profesional.
