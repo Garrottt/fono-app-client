@@ -37,7 +37,10 @@ type SessionFormUpdater = (updater: (current: SessionFormState) => SessionFormSt
 interface SpecificObjectiveLibraryItem {
   id: string
   description: string
-  operationalObjectives: string[]
+  operationalObjectives: Array<{
+    id: string
+    description: string
+  }>
 }
 
 const getRequestErrorMessage = (error: unknown, fallbackMessage: string) => {
@@ -306,7 +309,10 @@ function SessionsSection({
       goals.map((goal) => ({
         id: goal.id,
         description: goal.description,
-        operationalObjectives: goal.operationalGoals.map((operationalGoal) => operationalGoal.description)
+        operationalObjectives: goal.operationalGoals.map((operationalGoal) => ({
+          id: operationalGoal.id,
+          description: operationalGoal.description
+        }))
       })),
     [goals]
   )
@@ -326,52 +332,97 @@ function SessionsSection({
     }))
   }
 
-  const clearSpecificObjectiveSearch = (key: string) => {
-    setSpecificObjectiveSearch((current) => ({
-      ...current,
-      [key]: ""
-    }))
-  }
-
   const getSpecificObjectiveMatches = (query: string) => {
     const normalizedQuery = query.trim().toLowerCase()
-    if (!normalizedQuery) return []
+    if (!normalizedQuery) return specificObjectiveLibrary
 
     const filteredLibrary = specificObjectiveLibrary.filter((item) => {
       return (
         item.description.toLowerCase().includes(normalizedQuery) ||
         item.operationalObjectives.some((operationalObjective) =>
-          operationalObjective.toLowerCase().includes(normalizedQuery)
+          operationalObjective.description.toLowerCase().includes(normalizedQuery)
         )
       )
     })
 
-    return filteredLibrary.slice(0, 8)
+    return filteredLibrary
   }
 
-  const addSpecificObjectiveFromLibrary = (
+  const toggleOperationalObjectiveFromLibrary = (
     setForm: SessionFormUpdater,
     libraryItem: SpecificObjectiveLibraryItem,
-    searchKey: string
+    operationalObjective: SpecificObjectiveLibraryItem["operationalObjectives"][number]
   ) => {
     setForm((current) => ({
       ...current,
-      specificObjectives: current.specificObjectives.some(
-        (specificObjective) => specificObjective.description.trim().toLowerCase() === libraryItem.description.trim().toLowerCase()
-      )
-        ? current.specificObjectives
-        : [
-          ...current.specificObjectives.filter((specificObjective) =>
-            specificObjective.description.trim() || specificObjective.operationalObjectives.some((item) => item.description.trim())
-          ),
-          createSpecificObjective(libraryItem.description, libraryItem.operationalObjectives.length > 0
-            ? libraryItem.operationalObjectives
-            : [""])
-        ]
-    }))
+      specificObjectives: (() => {
+        const existingSpecificObjectiveIndex = current.specificObjectives.findIndex(
+          (specificObjective) =>
+            specificObjective.description.trim().toLowerCase() === libraryItem.description.trim().toLowerCase()
+        )
 
-    clearSpecificObjectiveSearch(searchKey)
+        if (existingSpecificObjectiveIndex === -1) {
+          return [
+            ...current.specificObjectives.filter((specificObjective) =>
+              specificObjective.description.trim() || specificObjective.operationalObjectives.some((item) => item.description.trim())
+            ),
+            createSpecificObjective(libraryItem.description, [operationalObjective.description])
+          ]
+        }
+
+        return current.specificObjectives.flatMap((specificObjective, specificIndex) => {
+          if (specificIndex !== existingSpecificObjectiveIndex) return [specificObjective]
+
+          const alreadySelected = specificObjective.operationalObjectives.some(
+            (item) => item.description.trim().toLowerCase() === operationalObjective.description.trim().toLowerCase()
+          )
+
+          if (alreadySelected) {
+            const remainingOperationalObjectives = specificObjective.operationalObjectives
+              .filter(
+                (item) => item.description.trim().toLowerCase() !== operationalObjective.description.trim().toLowerCase()
+              )
+              .map((item, index) => ({
+                ...item,
+                order: index + 1
+              }))
+
+            return remainingOperationalObjectives.length > 0
+              ? [{
+                ...specificObjective,
+                operationalObjectives: remainingOperationalObjectives
+              }]
+              : []
+          }
+
+          return [{
+            ...specificObjective,
+            operationalObjectives: [
+              ...specificObjective.operationalObjectives,
+              {
+                ...createOperationalObjective(operationalObjective.description),
+                order: specificObjective.operationalObjectives.length + 1
+              }
+            ]
+          }]
+        })
+      })()
+    }))
   }
+
+  const isOperationalObjectiveSelected = (
+    form: SessionFormState,
+    specificObjectiveDescription: string,
+    operationalObjectiveDescription: string
+  ) => (
+    form.specificObjectives.some((specificObjective) =>
+      specificObjective.description.trim().toLowerCase() === specificObjectiveDescription.trim().toLowerCase() &&
+      specificObjective.operationalObjectives.some(
+        (operationalObjective) =>
+          operationalObjective.description.trim().toLowerCase() === operationalObjectiveDescription.trim().toLowerCase()
+      )
+    )
+  )
 
   const resetCreateForm = () => {
     setCreateForm({
@@ -639,7 +690,7 @@ const renderSessionForm = (
                   <p className="mt-3 text-sm text-slate-500">
                     Primero carga objetivos específicos y operacionales en el bloque de Objetivos.
                   </p>
-                ) : !searchQuery.trim() ? (
+                ) : false ? (
                   <p className="mt-3 text-sm text-slate-500">
                     Escribe un objetivo específico o una palabra clave para comenzar la búsqueda.
                   </p>
@@ -652,25 +703,54 @@ const renderSessionForm = (
                     {specificObjectiveMatches.map((libraryItem) => (
                       <div
                         key={`${searchKey}-${libraryItem.id}`}
-                        className="flex flex-col gap-3 rounded-xl border border-white bg-white px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between"
+                        className="rounded-xl border border-white bg-white px-3 py-3 shadow-sm"
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-slate-700">{libraryItem.description}</p>
                           <p className="mt-1 text-xs text-slate-500">
-                            {libraryItem.operationalObjectives.length} objetivo(s) operacional(es) asociados
+                            {libraryItem.operationalObjectives.length} objetivo(s) operacional(es) disponibles
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => addSpecificObjectiveFromLibrary(
-                            setForm,
-                            libraryItem,
-                            searchKey
-                          )}
-                          className="rounded-lg border border-indigo-200 px-3 py-2 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50"
-                        >
-                          Agregar O.E.
-                        </button>
+                        <div className="mt-3 grid gap-2">
+                          {libraryItem.operationalObjectives.length === 0 ? (
+                            <p className="text-xs text-slate-400">
+                              Este O.E. aÃºn no tiene O.O. cargados.
+                            </p>
+                          ) : libraryItem.operationalObjectives.map((operationalObjective, operationalIndex) => {
+                            const selected = isOperationalObjectiveSelected(
+                              form,
+                              libraryItem.description,
+                              operationalObjective.description
+                            )
+
+                            return (
+                              <button
+                                key={`${libraryItem.id}-${operationalObjective.id}`}
+                                type="button"
+                                onClick={() => toggleOperationalObjectiveFromLibrary(
+                                  setForm,
+                                  libraryItem,
+                                  operationalObjective
+                                )}
+                                className={`flex w-full items-start justify-between gap-3 rounded-xl border px-3 py-3 text-left text-sm transition ${
+                                  selected
+                                    ? "border-indigo-300 bg-indigo-50 text-indigo-700"
+                                    : "border-slate-200 bg-slate-50 text-slate-700 hover:border-indigo-200 hover:bg-white"
+                                }`}
+                              >
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-current/70">
+                                    O.O.{operationalIndex + 1}
+                                  </p>
+                                  <p className="mt-1 leading-relaxed">{operationalObjective.description}</p>
+                                </div>
+                                <span className="shrink-0 rounded-full border border-current/15 px-2 py-1 text-[11px] font-semibold">
+                                  {selected ? "Seleccionado" : "Seleccionar"}
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -708,14 +788,40 @@ const renderSessionForm = (
                   <div className="space-y-4 p-4">
                     <div>
                       <div className="mb-3 flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-slate-700">Objetivos operacionales</p>
-                        <span className="text-xs text-slate-500">Solo lectura</span>
+                        <p className="text-sm font-semibold text-slate-700">Objetivos operacionales seleccionados</p>
+                        <span className="text-xs text-slate-500">Puedes quitar los que no usarÃ¡s</span>
                       </div>
                       <div className="space-y-3">
                         {specificObjective.operationalObjectives.map((operationalObjective, operationalIndex) => (
                           <div key={`operational-${specificIndex}-${operationalIndex}`} className="rounded-xl border border-slate-200 p-3">
                             <div className="mb-2 flex items-center justify-between gap-3">
                               <p className="text-sm font-semibold text-slate-700">O.O.{operationalIndex + 1}</p>
+                              <button
+                                type="button"
+                                onClick={() => setForm((current) => ({
+                                  ...current,
+                                  specificObjectives: current.specificObjectives.flatMap((currentSpecificObjective, currentSpecificIndex) => {
+                                    if (currentSpecificIndex !== specificIndex) return [currentSpecificObjective]
+
+                                    const remainingOperationalObjectives = currentSpecificObjective.operationalObjectives
+                                      .filter((_, currentOperationalIndex) => currentOperationalIndex !== operationalIndex)
+                                      .map((item, index) => ({
+                                        ...item,
+                                        order: index + 1
+                                      }))
+
+                                    return remainingOperationalObjectives.length > 0
+                                      ? [{
+                                        ...currentSpecificObjective,
+                                        operationalObjectives: remainingOperationalObjectives
+                                      }]
+                                      : []
+                                  })
+                                }))}
+                                className="text-xs font-medium text-rose-500 transition hover:text-rose-700"
+                              >
+                                Quitar
+                              </button>
                             </div>
                             <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
                               {operationalObjective.description}
