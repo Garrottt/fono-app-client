@@ -106,7 +106,7 @@ function DashboardPage() {
     }`
 
   return (
-    <div className="min-h-screen px-3 pb-24 pt-3 sm:px-4 sm:pb-28 lg:px-5 lg:pb-5 lg:pt-5">
+    <div className="min-h-screen px-3 pb-24 pt-3 sm:px-4 sm:pb-28 lg:px-4 lg:pb-4 lg:pt-4">
       {mobileMenuOpen && (
         <button
           type="button"
@@ -116,8 +116,8 @@ function DashboardPage() {
         />
       )}
 
-      <div className="mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-[1600px] gap-5 lg:min-h-[calc(100vh-2.5rem)]">
-        <aside className="fono-card hidden w-[308px] shrink-0 flex-col rounded-[2rem] p-5 lg:flex">
+      <div className="mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-[1440px] gap-4 lg:min-h-[calc(100vh-2rem)]">
+        <aside className="fono-card hidden w-[284px] shrink-0 flex-col rounded-[1.8rem] p-4 lg:flex">
           <div className="rounded-[1.6rem] border border-white/60 bg-white/85 p-4 shadow-[0_20px_40px_rgba(15,23,42,0.08)]">
             <AppBrand />
             <p className="mt-4 text-sm leading-6 text-slate-500">
@@ -125,7 +125,7 @@ function DashboardPage() {
             </p>
           </div>
 
-          <div className="mt-5 rounded-[1.6rem] border border-white/60 bg-white/72 p-4">
+          <div className="mt-4 rounded-[1.4rem] border border-white/60 bg-white/72 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Sesión activa</p>
             <p className="mt-3 text-lg font-semibold text-slate-950">{user?.name || "Profesional"}</p>
               <p className="mt-1 text-sm text-slate-500">Profesional de atención</p>
@@ -145,7 +145,7 @@ function DashboardPage() {
         </aside>
 
         <aside
-          className={`fixed inset-y-0 left-0 z-50 flex w-[min(88vw,22rem)] flex-col bg-white/96 p-4 shadow-[0_32px_60px_rgba(15,23,42,0.18)] backdrop-blur-xl transition-transform duration-200 lg:hidden ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+          className={`fixed inset-y-0 left-0 z-50 flex w-[min(88vw,20rem)] flex-col bg-white/96 p-4 shadow-[0_32px_60px_rgba(15,23,42,0.18)] backdrop-blur-xl transition-transform duration-200 lg:hidden ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
           <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
             <div className="flex items-start justify-between gap-3">
@@ -187,8 +187,8 @@ function DashboardPage() {
         </aside>
 
         <div className="min-w-0 flex-1">
-          <div className="fono-card flex min-h-full flex-col rounded-[2rem]">
-            <header className="sticky top-3 z-30 border-b border-white/70 bg-white/70 px-4 py-4 backdrop-blur-xl sm:px-6 lg:top-5 lg:px-8">
+          <div className="fono-card flex min-h-full flex-col rounded-[1.8rem]">
+            <header className="sticky top-3 z-30 border-b border-white/70 bg-white/70 px-4 py-4 backdrop-blur-xl sm:px-5 lg:top-4 lg:px-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
                   <button
@@ -204,7 +204,7 @@ function DashboardPage() {
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Módulo activo</p>
                     <div className="mt-1 flex flex-wrap items-center gap-3">
-                      <h1 className="fono-title text-2xl font-semibold text-slate-950 sm:text-[2rem]">
+                      <h1 className="fono-title text-[1.7rem] font-semibold text-slate-950 sm:text-[1.9rem]">
                         {currentSection.label}
                       </h1>
                       <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
@@ -239,7 +239,7 @@ function DashboardPage() {
               </div>
             </header>
 
-            <main className="flex-1 overflow-auto px-2 pb-4 pt-2 sm:px-3 lg:px-4">
+            <main className="flex-1 overflow-auto px-2 pb-4 pt-2 sm:px-3 lg:px-3">
               <div key={location.pathname} className="fono-page-transition">
                 <Outlet />
               </div>

@@ -24,12 +24,25 @@
 }
 
 html {
+  font-size: 15px;
   min-height: 100%;
   background:
     radial-gradient(circle at top left, rgba(20, 184, 166, 0.16), transparent 28%),
     radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 24%),
     linear-gradient(180deg, #f8fbff 0%, #f4f7fb 42%, #eef4f7 100%);
   scroll-behavior: smooth;
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 15px;
+  }
 }
 
 body {

@@ -90,6 +90,25 @@ const createEmptySessionForm = (): SessionFormState => ({
   sessionTasks: []
 })
 
+const hasRequiredPlanningData = ({
+  generalObjective,
+  contentHierarchy,
+  hierarchyCriteria,
+  focus,
+  modality,
+  strategies
+}: Pick<
+  SessionsSectionProps,
+  "generalObjective" | "contentHierarchy" | "hierarchyCriteria" | "focus" | "modality" | "strategies"
+>) => (
+  Boolean(generalObjective.trim()) &&
+  contentHierarchy.some((item) => item.trim()) &&
+  Boolean(hierarchyCriteria.trim()) &&
+  Boolean(focus.trim()) &&
+  Boolean(modality.trim()) &&
+  Boolean(strategies.trim())
+)
+
 const mapSessionToForm = (session: Session): SessionFormState => ({
   date: session.date.split("T")[0],
   whatWasDone: session.whatWasDone,
@@ -871,7 +890,7 @@ const renderSessionForm = (
           disabled={submitDisabled}
           className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {submitDisabled ? "Guardando..." : actionLabel}
+          {saving ? "Guardando..." : actionLabel}
         </button>
       </div>
     </div>
@@ -879,6 +898,20 @@ const renderSessionForm = (
 
   return (
     <section className="space-y-4">
+      {!hasRequiredPlanningData({
+        generalObjective,
+        contentHierarchy,
+        hierarchyCriteria,
+        focus,
+        modality,
+        strategies
+      }) && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Para guardar una sesion primero debes completar la planificacion clinica del paciente:
+          objetivo general, jerarquizacion, criterio, foco, modalidad y estrategias.
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 rounded-2xl bg-slate-900 px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">Seguimiento clínico</p>

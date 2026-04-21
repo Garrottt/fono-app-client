@@ -69,7 +69,8 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
     setLoading(true)
 
     try {
-      const data = await loginService({ email, password })
+      const normalizedEmail = email.trim().toLowerCase()
+      const data = await loginService({ email: normalizedEmail, password })
       login(data.token, data.user)
       navigate(data.user.role === "PATIENT" ? "/portal" : "/dashboard")
     } catch {
@@ -87,38 +88,38 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
         <div className="absolute bottom-[4%] left-[28%] h-64 w-64 rounded-full bg-cyan-200/12 blur-3xl" />
       </div>
 
-      <div className="relative grid min-h-screen lg:grid-cols-[1.25fr_0.75fr]">
-        <section className="relative flex items-center px-5 py-8 sm:px-8 lg:px-12 lg:py-10 xl:px-16">
+      <div className="relative grid min-h-screen lg:grid-cols-[1.18fr_0.82fr]">
+        <section className="relative flex items-center px-5 py-8 sm:px-7 lg:px-10 lg:py-9 xl:px-12">
           <div className="absolute inset-0 bg-[linear-gradient(145deg,#020617_0%,#0f172a_42%,#134e4a_100%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.14),transparent_22%),radial-gradient(circle_at_80%_18%,rgba(45,212,191,0.18),transparent_24%),radial-gradient(circle_at_20%_80%,rgba(125,211,252,0.12),transparent_24%)]" />
 
-          <div className="relative mx-auto grid w-full max-w-7xl gap-8 xl:grid-cols-[1.05fr_0.95fr] xl:items-center">
+          <div className="relative mx-auto grid w-full max-w-6xl gap-7 xl:grid-cols-[1fr_0.88fr] xl:items-center">
             <div className="max-w-2xl text-white">
               <div className="inline-flex items-center rounded-full border border-white/14 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white/72">
                 Consulta fonoaudiologica
               </div>
 
-              <div className="mt-6">
+              <div className="mt-5">
                 <AppBrand />
               </div>
 
-              <p className="mt-10 text-xs font-semibold uppercase tracking-[0.28em] text-teal-200/85">
+              <p className="mt-8 text-xs font-semibold uppercase tracking-[0.28em] text-teal-200/85">
                 Espacio profesional personalizado
               </p>
-              <h1 className="fono-title mt-4 max-w-xl text-4xl font-semibold leading-tight text-white sm:text-5xl xl:text-6xl">
+              <h1 className="fono-title mt-3 max-w-xl text-3xl font-semibold leading-tight text-white sm:text-4xl xl:text-5xl">
                 Ana Sol Munizaga Saldano
               </h1>
-              <p className="mt-4 text-lg font-medium text-teal-100/92 sm:text-xl">Fonoaudiologa</p>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-white/78 sm:text-lg">
+              <p className="mt-3 text-base font-medium text-teal-100/92 sm:text-lg">Fonoaudiologa</p>
+              <p className="mt-5 max-w-2xl text-sm leading-7 text-white/78 sm:text-base">
                 Un acceso clinico pensado para revisar pacientes, ordenar objetivos terapeuticos,
                 planificar sesiones y sostener una experiencia de atencion mas clara y profesional.
               </p>
 
-              <div className="mt-8 grid gap-3">
+              <div className="mt-7 grid gap-3">
                 {QUICK_POINTS.map((point) => (
                   <div
                     key={point}
-                    className="flex items-center gap-3 rounded-[1.2rem] border border-white/10 bg-white/10 px-4 py-4 text-sm font-medium text-white/90 backdrop-blur-sm sm:text-base"
+                    className="flex items-center gap-3 rounded-[1.2rem] border border-white/10 bg-white/10 px-4 py-3.5 text-sm font-medium text-white/90 backdrop-blur-sm"
                   >
                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
                     {point}
@@ -126,13 +127,13 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
                 ))}
               </div>
 
-              <div className="mt-10 rounded-[1.8rem] border border-white/10 bg-white/10 p-5 backdrop-blur-sm sm:p-6">
+              <div className="mt-8 rounded-[1.8rem] border border-white/10 bg-white/10 p-5 backdrop-blur-sm sm:p-5.5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
                       Formacion y certificaciones
                     </p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">
+                    <h2 className="mt-2 text-xl font-semibold text-white">
                       Presentacion profesional
                     </h2>
                   </div>
@@ -160,12 +161,12 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
             </div>
 
             <div className="mx-auto w-full max-w-[620px]">
-              <div className="relative overflow-hidden rounded-[2.2rem] border border-white/12 bg-white/10 p-4 shadow-[0_28px_64px_rgba(15,23,42,0.26)] backdrop-blur-md sm:p-6">
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/12 bg-white/10 p-4 shadow-[0_28px_64px_rgba(15,23,42,0.26)] backdrop-blur-md sm:p-5">
                 <div className="absolute inset-x-10 top-6 h-24 rounded-full bg-white/10 blur-3xl" />
                 <img
                   src={anaSolLoginImage}
                   alt="Retrato ilustrado de Ana Sol Munizaga Saldano"
-                  className="relative h-[420px] w-full rounded-[1.8rem] object-contain object-top sm:h-[560px] xl:h-[680px]"
+                  className="relative h-[360px] w-full rounded-[1.6rem] object-contain object-top sm:h-[500px] xl:h-[600px]"
                 />
                 <div className="relative mt-5 rounded-[1.4rem] border border-white/10 bg-slate-950/35 px-5 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
@@ -180,11 +181,11 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
           </div>
         </section>
 
-        <section className="relative flex items-center px-5 py-8 sm:px-8 lg:px-10 xl:px-12">
+        <section className="relative flex items-center px-5 py-8 sm:px-7 lg:px-9 xl:px-10">
           <div className="absolute inset-0 bg-white/88 backdrop-blur-xl" />
 
           <div className="relative mx-auto w-full max-w-md">
-            <div className="rounded-[2rem] border border-white/80 bg-white px-5 py-6 shadow-[0_24px_60px_rgba(15,23,42,0.10)] sm:px-7 sm:py-8">
+            <div className="rounded-[1.8rem] border border-white/80 bg-white px-5 py-6 shadow-[0_24px_60px_rgba(15,23,42,0.10)] sm:px-6 sm:py-7">
               <div className="lg:hidden">
                 <AppBrand />
               </div>
@@ -193,7 +194,7 @@ function LoginPage({ mode = "professional" }: LoginPageProps) {
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
                   {pageCopy.eyebrow}
                 </p>
-                <h2 className="fono-title mt-3 text-3xl font-semibold text-slate-950">
+                <h2 className="fono-title mt-3 text-[1.85rem] font-semibold text-slate-950">
                   {pageCopy.title}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-500">{pageCopy.description}</p>
